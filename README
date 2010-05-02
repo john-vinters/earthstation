@@ -1,0 +1,32 @@
+EarthStation
+------------
+
+John Vinters, G7NSN
+2-May-2010
+
+Introduction
+------------
+
+EarthStation is a satellite tracking application written in Ada 2005 using
+the GtkAda library for display.  The application uses the algorithms
+described by James Miller G3RUH in the article "Plan-13 Satellite Position
+Calculation Program" (read the article online at 
+http://www.amsat.org/amsat/articles/g3ruh/111.html).
+
+Requirements
+------------
+
+   * A reasonably recent GNAT Ada Compiler.  EarthStation was developed using
+     GCC GNAT 4.4.2.  Versions of roughly this age or newer should work
+     correctly.
+
+   * GtkAda 2.14 or later.
+
+   * FreeBSD or Linux.  (Other BSDs may work, but are currently untested).
+
+License
+-------
+
+EarthStation is licensed under the GNU General Public License Version 3,
+or (at your option) any later version.  See the file COPYING for full details.
+
