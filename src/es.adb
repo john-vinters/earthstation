@@ -19,10 +19,16 @@
 
 pragma License (GPL);
 
-with EarthStation.Predict;
+with EarthStation.Main_Window;		use EarthStation.Main_Window;
+with EarthStation.Predict;		use EarthStation.Predict;
+with Gtk.Main;				use Gtk.Main;
 
 procedure ES is
+   Main_Win	: Main_Window;
 begin
-   --  Dummy Main for now
-   null;
+   Gtk.Main.Init;
+   Gtk_New (Main_Win);
+   Show_All (Main_Win);
+   Gtk.Main.Main;
 end ES;
+
