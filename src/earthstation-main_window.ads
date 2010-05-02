@@ -19,6 +19,7 @@
 
 pragma License (GPL);
 
+with EarthStation.Map_Display;		use EarthStation.Map_Display;
 with Gtk.Box;				use Gtk.Box;
 with Gtk.Status_Bar;			use Gtk.Status_Bar;
 with Gtk.Widget;			use Gtk.Widget;
@@ -36,6 +37,7 @@ package EarthStation.Main_Window is
 private
 
    type Main_Window_Record is new Gtk_Window_Record with record
+      Map		: Map_Display.Map_Display := null;
       Status_Bar	: Gtk_Status_Bar;
       VBox		: Gtk_Box;
    end record;

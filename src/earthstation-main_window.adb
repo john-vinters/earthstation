@@ -55,6 +55,10 @@ package body EarthStation.Main_Window is
    procedure Initialize (This : access Main_Window_Record'Class) is
    begin
       Gtk.Window.Initialize (This, Window_Toplevel);
+
+      Gtk_New (This.Map, "images/map.jpg");
+      --  XXX FIXME: map filename be different when the app is installed! XXX
+
       Set_Title (This, "EarthStation");
       Set_Default_Size (This, 800, 600);
       Set_Position (This, Win_Pos_Center);
@@ -63,6 +67,7 @@ package body EarthStation.Main_Window is
         (This, "destroy", Window_Callback.To_Marshaller (Exit_Main'Access));
 
       Gtk_New_VBox (This.VBox, Homogeneous => False, Spacing => 1);
+      Pack_Start (This.VBox, This.Map, Expand => True, Fill => True);
       Add (This, This.VBox);
    end Initialize;
 
