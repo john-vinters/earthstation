@@ -22,7 +22,6 @@ pragma License (GPL);
 with Ada.Calendar;			use Ada.Calendar;
 with Ada.Calendar.Formatting;		use Ada.Calendar.Formatting;
 with Ada.Calendar.Time_Zones;		use Ada.Calendar.Time_Zones;
-with Ada.Numerics;
 
 package body EarthStation.Predict is
 
@@ -60,8 +59,7 @@ package body EarthStation.Predict is
    -----------------------------
 
    function Calculate_Range_Vectors
-     (Sat		: in     Satellite;
-      Groundstation	: in     Observer;
+     (Groundstation	: in     Observer;
       Sat_Vectors	: in     Satellite_Vectors) return Range_Vectors
    is
       R			: Range_Vectors;
@@ -271,7 +269,7 @@ package body EarthStation.Predict is
       Day_Number	:    out Long_Integer;
       Day_Fraction	:    out Long_Float)
    is
-      Adj_Timestamp	: Ada.Calendar.Time :=
+      Adj_Timestamp	: constant Ada.Calendar.Time :=
         Timestamp - Duration (UTC_Time_Offset * 60);
       Year		: Ada.Calendar.Year_Number;
       Month		: Ada.Calendar.Month_Number;

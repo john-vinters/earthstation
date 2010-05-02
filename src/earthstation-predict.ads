@@ -44,8 +44,7 @@ package EarthStation.Predict is
    --  Arctangent, protected against divide by 0
 
    function Calculate_Range_Vectors
-     (Sat		: in     Satellite;
-      Groundstation	: in     Observer;
+     (Groundstation	: in     Observer;
       Sat_Vectors	: in     Satellite_Vectors) return Range_Vectors;
    --  Calculates Range Vectors given Satellite and Observer Information.
 
@@ -71,7 +70,6 @@ package EarthStation.Predict is
    --  Returns Day number given Date
 
    function Degrees (Radians : in Long_Float) return Long_Float;
-   pragma Inline (Degrees);
    --  Converts radians to degrees
 
    function Get_AMSAT_Day (This : in Satellite_Vectors) return Long_Integer;
@@ -173,7 +171,6 @@ package EarthStation.Predict is
    --  and Attitude_Latitude are in Degrees.
 
    function Radians (Degrees : in Long_Float) return Long_Float;
-   pragma Inline (Radians);
    --  Converts degrees to radians
 
    function Time_To_Day_Fraction
@@ -324,7 +321,6 @@ private
    end record;
 
    function Sgn (This : in Long_Float) return Long_Float;
-   pragma Inline (Sgn);
 
 end EarthStation.Predict;
 
