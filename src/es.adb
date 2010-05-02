@@ -20,7 +20,6 @@
 pragma License (GPL);
 
 with EarthStation.Main_Window;		use EarthStation.Main_Window;
-with EarthStation.Predict;		use EarthStation.Predict;
 with Gtk.Main;				use Gtk.Main;
 
 procedure ES is
