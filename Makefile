@@ -1,7 +1,12 @@
 
 FLAGS	= -O3 -gnatn -gnatN -j2 -gnatwa
 
-earthstation:
+default: earthstation
+
+dirs:
+	@mkdir -p build
+
+earthstation: dirs
 	gnatmake $(FLAGS) -gnat05 -Asrc -D build es.adb `gtkada-config`
 
 clean:
