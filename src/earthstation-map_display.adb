@@ -351,9 +351,8 @@ package body EarthStation.Map_Display is
       Height		: in  Gint)
    is
       GC		: constant Gdk.GC.Gdk_GC := Get_Black_GC (Get_Style (This));
-      Temp		: Gdk_Pixbuf := Scale_Simple (This.Map_Image, Width, Height);
+      Temp		: constant Gdk_Pixbuf := Scale_Simple (This.Map_Image, Width, Height);
    begin
-      Temp := Scale_Simple (This.Map_Image, Width, Height);
       This.Current_Height := Height;
       This.Current_Width := Width;
 
