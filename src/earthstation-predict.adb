@@ -620,6 +620,27 @@ package body EarthStation.Predict is
       This.MASE := Radians (MAS0 + MASD * This.TEG);
    end Initialize_Satellite;
 
+   procedure Initialize_Satellite
+     (This		: in out Satellite;
+      Elements		: in     Keplerian_Elements)
+   is
+   begin
+      Initialize_Satellite
+        (This			=> This,
+         Epoch_Year		=> Elements.Epoch_Year,
+         Epoch_Time		=> Elements.Epoch_Time,
+         Inclination		=> Elements.Inclination,
+         RAAN			=> Elements.RAAN,
+         Eccentricity		=> Elements.Eccentricity,
+         Argument_Perigee	=> Elements.Argument_Perigee,
+         Mean_Anomaly		=> Elements.Mean_Anomaly,
+         Mean_Motion		=> Elements.Mean_Motion,
+         Decay_Rate		=> Elements.Decay_Rate,
+         Orbit_Number		=> Elements.Orbit_Number,
+         Attitude_Longitude	=> Elements.ALON,
+         Attitude_Latitude	=> Elements.ALAT);
+   end Initialize_Satellite;
+
    -------------
    -- Radians --
    -------------

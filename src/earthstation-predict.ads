@@ -36,6 +36,21 @@ package EarthStation.Predict is
    type Satellite is private;
    type Satellite_Vectors is private;
 
+   type Keplerian_Elements is record
+      Epoch_Year	: Integer;
+      Epoch_Time	: Long_Float;
+      Inclination	: Long_Float;
+      RAAN		: Long_Float;
+      Eccentricity	: Long_Float;
+      Argument_Perigee	: Long_Float;
+      Mean_Anomaly	: Long_Float;
+      Mean_Motion	: Long_Float;
+      Decay_Rate	: Long_Float;
+      Orbit_Number	: Long_Integer;
+      ALON		: Long_Float;
+      ALAT		: Long_Float;
+   end record;
+
    RE	: constant Long_Float := 6378.137;	--  WGS-84 Earth Ellipsoid
 
    function Atn
@@ -169,6 +184,11 @@ package EarthStation.Predict is
    --  Initializes a Satellite.
    --  Inclination, RAAN, Argument_Perigee, Mean_Anomaly, Attitude_Longitude
    --  and Attitude_Latitude are in Degrees.
+
+   procedure Initialize_Satellite
+     (This		: in out Satellite;
+      Elements		: in     Keplerian_Elements);
+   --  Initializes a Satellite using preloaded Keplerian Elements
 
    function Radians (Degrees : in Long_Float) return Long_Float;
    --  Converts degrees to radians
