@@ -59,6 +59,8 @@ package body EarthStation.Main_Window is
       Gtk_New (This.Map, "images/map.jpg");
       --  XXX FIXME: map filename be different when the app is installed! XXX
 
+      Gtk_New (This.Satellite_Data);
+
       Set_Title (This, "EarthStation");
       Set_Default_Size (This, 800, 600);
       Set_Position (This, Win_Pos_Center);
@@ -68,6 +70,7 @@ package body EarthStation.Main_Window is
 
       Gtk_New_VBox (This.VBox, Homogeneous => False, Spacing => 1);
       Pack_Start (This.VBox, This.Map, Expand => True, Fill => True);
+      Pack_Start (This.VBox, This.Satellite_Data, Expand => False, Fill => True);
       Add (This, This.VBox);
    end Initialize;
 
