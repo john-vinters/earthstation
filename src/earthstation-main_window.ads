@@ -47,5 +47,8 @@ private
    procedure Exit_Main (Object : access Gtk_Widget_Record'Class);
    --  "destroy" event handler for when main window is closed by user
 
+   function Handle_Timeout (This : in Main_Window) return Boolean;
+   --  Timer tick handler (updates display)
+
 end EarthStation.Main_Window;
 
