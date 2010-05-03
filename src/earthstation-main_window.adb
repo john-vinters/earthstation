@@ -41,11 +41,13 @@ package body EarthStation.Main_Window is
 
    procedure Exit_Main (Object : access Gtk_Menu_Item_Record'Class) is
    begin
+      pragma Unreferenced (Object);
       Main_Quit;
    end Exit_Main;
 
    procedure Exit_Main (Object : access Gtk_Widget_Record'Class) is
    begin
+      pragma Unreferenced (Object);
       Main_Quit;
    end Exit_Main;
 
