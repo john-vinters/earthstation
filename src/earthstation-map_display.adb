@@ -132,6 +132,8 @@ package body EarthStation.Map_Display is
    ---------------
 
    procedure Draw_Grid (This : access Map_Display_Record'Class) is
+      CX	: constant Gint := Longitude_To_X (This, 0.0);
+      CY        : constant Gint := Latitude_To_Y (This, 0.0);
       GC	: Gdk.GC.Gdk_GC;
       Height	: constant Gint := This.all.Current_Height;
       L		: Long_Float;
@@ -164,20 +166,20 @@ package body EarthStation.Map_Display is
                Deg_South	: constant Integer := abs (Integer (L));
                South_Str	: constant String := Deg_South'Img & "'S";
             begin
-               Draw_Text (This.Scaled_Map, Grid_Font, GC, Width / 2 - 1, Y, South_Str);
+               Draw_Text (This.Scaled_Map, Grid_Font, GC, CX, Y - 2, South_Str);
             end;
          elsif Latitude > 0 then
             declare
                Deg_North	: constant Integer := Integer (L);
                North_Str	: constant String := Deg_North'Img & "'N";
             begin
-               Draw_Text (This.Scaled_Map, Grid_Font, GC, Width / 2 - 1, Y, North_Str);
+               Draw_Text (This.Scaled_Map, Grid_Font, GC, CX, Y - 2, North_Str);
             end;
          else
             declare
                Label		: constant String := " 0'";
             begin
-               Draw_Text (This.Scaled_Map, Grid_Font, GC, Width / 2 - 1, Y, Label);
+               Draw_Text (This.Scaled_Map, Grid_Font, GC, CX, Y - 2, Label);
             end;
          end if;
       end loop;
@@ -198,14 +200,14 @@ package body EarthStation.Map_Display is
                Deg_West		: constant Integer := abs (Integer (L));
                West_Str		: constant String := Deg_West'Img & "'W";
             begin
-               Draw_Text (This.Scaled_Map, Grid_Font, GC, X, Height / 2 - 1, West_Str);
+               Draw_Text (This.Scaled_Map, Grid_Font, GC, X, CY - 2, West_Str);
             end;
          elsif Longitude > 0 then
             declare
                Deg_East		: constant Integer := Integer (L);
                East_Str		: constant String := Deg_East'Img & "'E";
             begin
-               Draw_Text (This.Scaled_Map, Grid_Font, GC, X, Height / 2 -1 , East_Str);
+               Draw_Text (This.Scaled_Map, Grid_Font, GC, X, CY - 2 , East_Str);
             end;
          end if;
       end loop;
