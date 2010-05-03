@@ -21,6 +21,7 @@ pragma License (GPL);
 
 with Ada.Calendar;			use Ada.Calendar;
 with Ada.Calendar.Formatting;		use Ada.Calendar.Formatting;
+with EarthStation.About_Box;		use EarthStation.About_Box;
 with Glib;				use Glib;
 with Glib.Main;				use Glib.Main;
 with Gtk;				use Gtk;
@@ -31,15 +32,20 @@ with Gtk.Main;				use Gtk.Main;
 package body EarthStation.Main_Window is
 
    package Main_Window_Timeout is new Glib.Main.Generic_Sources (Main_Window);
+   package Menu_Item_Callback is new Handlers.Callback (Gtk_Menu_Item_Record);
    package Window_Callback is new Handlers.Callback (Gtk_Widget_Record);
 
    ---------------
    -- Exit_Main --
    ---------------
 
+   procedure Exit_Main (Object : access Gtk_Menu_Item_Record'Class) is
+   begin
+      Main_Quit;
+   end Exit_Main;
+
    procedure Exit_Main (Object : access Gtk_Widget_Record'Class) is
    begin
-      Destroy (Object);
       Main_Quit;
    end Exit_Main;
 
@@ -77,25 +83,49 @@ package body EarthStation.Main_Window is
    ----------------
 
    procedure Initialize (This : access Main_Window_Record'Class) is
+      Menu_Item		: Gtk_Menu_Item;
       Timeout		: G_Source_Id;
       pragma Unreferenced (Timeout);
    begin
       Gtk.Window.Initialize (This, Window_Toplevel);
 
-      Gtk_New (This.Status_Bar);
+      Gtk_New (This.Menu_Bar);
       Gtk_New (This.Map, "images/map.jpg");
       --  XXX FIXME: map filename be different when the app is installed! XXX
 
       Gtk_New (This.Satellite_Data);
+      Gtk_New (This.Status_Bar);
 
       Set_Title (This, "EarthStation");
       Set_Default_Size (This, 800, 600);
       Set_Position (This, Win_Pos_Center);
 
+      --  Setup main menu
+      --  File Menu
+      Gtk_New (This.File_Menu);
+      Gtk_New_With_Mnemonic (Menu_Item, "E_xit");
+      Menu_Item_Callback.Connect
+        (Menu_Item, "activate", Menu_Item_Callback.To_Marshaller (Exit_Main'Access));
+      Append (This.File_Menu, Menu_Item);
+      Gtk_New_With_Mnemonic (Menu_Item, "_File");
+      Append (This.Menu_Bar, Menu_Item);
+      Set_Submenu (Menu_Item, This.File_Menu);
+
+      --  Help Menu
+      Gtk_New (This.Help_Menu);
+      Gtk_New_With_Mnemonic (Menu_Item, "_About");
+      Menu_Item_Callback.Connect
+        (Menu_Item, "activate", Menu_Item_Callback.To_Marshaller (Show_About_Box'Access));
+      Append (This.Help_Menu, Menu_Item);
+      Gtk_New_With_Mnemonic (Menu_Item, "_Help");
+      Append (This.Menu_Bar, Menu_Item);
+      Set_Submenu (Menu_Item, This.Help_Menu);
+
       Window_Callback.Connect
         (This, "destroy", Window_Callback.To_Marshaller (Exit_Main'Access));
 
       Gtk_New_VBox (This.VBox, Homogeneous => False, Spacing => 1);
+      Pack_Start (This.VBox, This.Menu_Bar, Expand => False, Fill => True);
       Pack_Start (This.VBox, This.Map, Expand => True, Fill => True);
       Pack_Start (This.VBox, This.Satellite_Data, Expand => False, Fill => True);
       Pack_Start (This.VBox, This.Status_Bar, Expand => False, Fill => True);
@@ -105,6 +135,16 @@ package body EarthStation.Main_Window is
       Timeout := Main_Window_Timeout.Timeout_Add
         (1000, Handle_Timeout'Access, Main_Window (This));
    end Initialize;
+
+   --------------------
+   -- Show_About_Box --
+   --------------------
+
+   procedure Show_About_Box (Object : access Gtk_Menu_Item_Record'Class) is
+   begin
+      pragma Unreferenced (Object);
+      EarthStation.About_Box.Run;
+   end Show_About_Box;
 
 end EarthStation.Main_Window;
 

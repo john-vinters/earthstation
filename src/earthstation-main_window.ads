@@ -22,6 +22,9 @@ pragma License (GPL);
 with EarthStation.Data_Table;		use EarthStation.Data_Table;
 with EarthStation.Map_Display;		use EarthStation.Map_Display;
 with Gtk.Box;				use Gtk.Box;
+with Gtk.Menu;				use Gtk.Menu;
+with Gtk.Menu_Bar;			use Gtk.Menu_Bar;
+with Gtk.Menu_Item;			use Gtk.Menu_Item;
 with Gtk.Status_Bar;			use Gtk.Status_Bar;
 with Gtk.Widget;			use Gtk.Widget;
 with Gtk.Window;			use Gtk.Window;
@@ -38,17 +41,24 @@ package EarthStation.Main_Window is
 private
 
    type Main_Window_Record is new Gtk_Window_Record with record
-      Map		: Map_Display.Map_Display := null;
-      Satellite_Data	: Data_Table.Data_Table := null;
+      File_Menu		: Gtk_Menu;
+      Help_Menu		: Gtk_Menu;
+      Map		: Map_Display.Map_Display;
+      Menu_Bar		: Gtk_Menu_Bar;
+      Satellite_Data	: Data_Table.Data_Table;
       Status_Bar	: Gtk_Status_Bar;
       VBox		: Gtk_Box;
    end record;
 
+   procedure Exit_Main (Object : access Gtk_Menu_Item_Record'Class);
    procedure Exit_Main (Object : access Gtk_Widget_Record'Class);
    --  "destroy" event handler for when main window is closed by user
 
    function Handle_Timeout (This : in Main_Window) return Boolean;
    --  Timer tick handler (updates display)
+
+   procedure Show_About_Box (Object : access Gtk_Menu_Item_Record'Class);
+   --  Shows the About Box dialogue box
 
 end EarthStation.Main_Window;
 
