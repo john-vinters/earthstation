@@ -184,7 +184,7 @@ package body EarthStation.Data_Table is
       Elevation_String	: constant String := ElR'Image (Elevation_Real)
                             & "<span size=""xx-small"" rise=""5000"">o</span>";
    begin
-      Set_Label (This.Elevation, Elevation_String);
+      Set_Label (This.Max_Elevation, Elevation_String);
    end Set_Max_Elevation;
 
    ------------------
