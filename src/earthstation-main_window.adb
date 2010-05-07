@@ -35,6 +35,8 @@ package body EarthStation.Main_Window is
    package Menu_Item_Callback is new Handlers.Callback (Gtk_Menu_Item_Record);
    package Window_Callback is new Handlers.Callback (Gtk_Widget_Record);
 
+   Shutting_Down		: Boolean := False;
+
    ---------------
    -- Exit_Main --
    ---------------
@@ -42,12 +44,14 @@ package body EarthStation.Main_Window is
    procedure Exit_Main (Object : access Gtk_Menu_Item_Record'Class) is
    begin
       pragma Unreferenced (Object);
+      Shutting_Down := True;
       Main_Quit;
    end Exit_Main;
 
    procedure Exit_Main (Object : access Gtk_Widget_Record'Class) is
    begin
       pragma Unreferenced (Object);
+      Shutting_Down := True;
       Main_Quit;
    end Exit_Main;
 
@@ -72,7 +76,7 @@ package body EarthStation.Main_Window is
          Junk		: Message_Id;
          Time_String	: constant String := "  UTC: " & Image (Now) & "Z";
       begin
-         if This.Status_Bar /= Null then
+         if not Shutting_Down then
             Pop (This.Status_Bar, 0);
             Junk := Push (This.Status_Bar, 0, Time_String);
             pragma Unreferenced (Junk);
