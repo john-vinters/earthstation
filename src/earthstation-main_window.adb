@@ -72,9 +72,11 @@ package body EarthStation.Main_Window is
          Junk		: Message_Id;
          Time_String	: constant String := "  UTC: " & Image (Now) & "Z";
       begin
-         Pop (This.Status_Bar, 0);
-         Junk := Push (This.Status_Bar, 0, Time_String);
-         pragma Unreferenced (Junk);
+         if This.Status_Bar /= Null then
+            Pop (This.Status_Bar, 0);
+            Junk := Push (This.Status_Bar, 0, Time_String);
+            pragma Unreferenced (Junk);
+         end if;
       end;
 
       return True;
