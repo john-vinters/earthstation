@@ -303,6 +303,7 @@ package body EarthStation.Data_Table is
    begin
       Attach_Label (This, Label, Left, Left + 1, Top, Top + 1);
       Gtk_New (Display_Element, " -");
+      Set_Use_Markup (Display_Element, True);
       Set_Alignment (Display_Element, 0.0, 0.5);
       Attach (This, Display_Element, Left + 1, Left + 2, Top, Top + 1, Options);
    end Setup_Label;
