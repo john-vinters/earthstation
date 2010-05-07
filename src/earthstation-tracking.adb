@@ -168,7 +168,6 @@ package body EarthStation.Tracking is
       Map_Display		: access Map_Display_Record'Class;
       Table_Display		: access Data_Table_Record'Class)
    is
-      C				: Gdk.Color.Gdk_Color := Groundstation_Colour;
       Dn			: Long_Integer := 0;
       Df			: Long_Float := 0.0;
       Now			: constant Time := Clock;
@@ -178,6 +177,7 @@ package body EarthStation.Tracking is
       package ESP renames EarthStation.Predict;
 
       procedure Iterate_Proc (Cursor : Satellite_Vector.Cursor) is
+         C	: Gdk.Color.Gdk_Color := Groundstation_Colour;
          Item	: Satellite_Data := Element (Cursor);
          Index	: constant Natural := To_Index (Cursor);
       begin
