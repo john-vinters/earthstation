@@ -32,6 +32,7 @@ package body EarthStation.Tracking is
    Max_Tries			: constant Natural := 8640;
    Minimum_Elevation		: constant Long_Float := 3.0;
    Null_Time			: constant Time := Clock;
+   Selected_Colour		: Gdk.Color.Gdk_Color;
 
    -------------------
    -- Add_Satellite --
@@ -139,6 +140,8 @@ package body EarthStation.Tracking is
          Alloc_Color (Get_Default_Colormap, Groundstation_Colour, False, True, Success);
          Inrange_Colour := Gdk.Color.Parse ("Green");
          Alloc_Color (Get_Default_Colormap, Inrange_Colour, False, True, Success);
+         Selected_Colour := Gdk.Color.Parse ("Cyan");
+         Alloc_Color (Get_Default_Colormap, Selected_Colour, False, True, Success);
          Colour_Configured := True;
       end if;
 
@@ -165,6 +168,7 @@ package body EarthStation.Tracking is
       Map_Display		: access Map_Display_Record'Class;
       Table_Display		: access Data_Table_Record'Class)
    is
+      C				: Gdk.Color.Gdk_Color := Groundstation_Colour;
       Dn			: Long_Integer := 0;
       Df			: Long_Float := 0.0;
       Now			: constant Time := Clock;
@@ -175,6 +179,7 @@ package body EarthStation.Tracking is
 
       procedure Iterate_Proc (Cursor : Satellite_Vector.Cursor) is
          Item	: Satellite_Data := Element (Cursor);
+         Index	: constant Natural := To_Index (Cursor);
       begin
          if Update_Sat then
             Item.Sat_Vectors := ESP.Calculate_Satellite_Vectors
@@ -185,6 +190,10 @@ package body EarthStation.Tracking is
                Calculate_Next_AOS_LOS (This, Item);
             end if;
             Replace_Element (This.Satellites, Cursor, Item);
+         end if;
+
+         if Index = This.Selected_Satellite then
+            C := Selected_Colour;
          end if;
 
          if ESP.Get_Elevation (Item.Rng_Vectors) > Minimum_Elevation then
@@ -202,7 +211,7 @@ package body EarthStation.Tracking is
                RS_Distance	=> ESP.Get_RS (Item.Sat_Vectors),
                Latitude		=> ESP.Get_Latitude (Item.Rng_Vectors),
                Longitude	=> ESP.Get_Longitude (Item.Rng_Vectors),
-               Colour		=> Groundstation_Colour);
+               Colour		=> C);
          end if;
 
          if To_Index (Cursor) = This.Selected_Satellite then
