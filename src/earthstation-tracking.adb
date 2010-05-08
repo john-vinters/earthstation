@@ -159,6 +159,25 @@ package body EarthStation.Tracking is
       Iterate (This.Satellites, Iterate_Proc'Access);
    end Initialize;
 
+   ----------------------
+   -- Select_Satellite --
+   ----------------------
+
+   procedure Select_Satellite
+     (This			: in out Data;
+      Satellite_Id		: in     String)
+   is
+      Temp			: Satellite_Data;
+   begin
+      for i in First_Index (This.Satellites) .. Last_Index (This.Satellites) loop
+         Temp := Element (This.Satellites, i);
+         if Temp.Satellite_Id = Satellite_Id then
+            This.Selected_Satellite := i;
+            exit;
+         end if;
+      end loop;
+   end Select_Satellite;
+
    --------------------
    -- Update_Display --
    --------------------

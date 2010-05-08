@@ -44,6 +44,12 @@ package EarthStation.Tracking is
       Height			: in     Long_Float);
    --  Initializes tracking - sets up groundstation details
 
+   procedure Select_Satellite
+     (This			: in out Data;
+      Satellite_Id		: in     String);
+   --  Selects a Satellite given it's Id; if Satellite can't be found, then
+   --  the current selection is left as-is.
+
    procedure Update_Display
      (This			: in out Data;
       Map_Display		: access Map_Display_Record'Class;
