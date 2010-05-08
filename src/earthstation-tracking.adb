@@ -19,6 +19,7 @@
 
 pragma License (GPL);
 
+with Ada.Characters.Handling;		use Ada.Characters.Handling;
 with Gdk.Color;				use Gdk.Color;
 with Gtk.Widget;			use Gtk.Widget;
 
@@ -48,11 +49,14 @@ package body EarthStation.Tracking is
       EarthStation.Predict.Initialize_Satellite
         (This		=> Item.Satellite,
          Elements	=> Elements);
-      Set_Unbounded_String (Item.Satellite_Id, Id);
+      Set_Unbounded_String (Item.Satellite_Id, To_Upper (Id));
 
       Calculate_Next_AOS_LOS (This, Item);
       Append (This.Satellites, Item);
-      This.Selected_Satellite := 1;
+
+      if This.Selected_Satellite = 0 then
+         Select_Satellite (This, Id);
+      end if;
    end Add_Satellite;
 
    ----------------------------
@@ -102,6 +106,16 @@ package body EarthStation.Tracking is
       Info.Next_Check := T;
    end Calculate_Next_AOS_LOS;
 
+   -----------
+   -- Clear --
+   -----------
+
+   procedure Clear (This : in out Data) is
+   begin
+      Clear (This.Satellites);
+      This.Selected_Satellite := 0;
+   end Clear;
+
    ----------------------
    -- Compare_Elements --
    ----------------------
@@ -113,6 +127,27 @@ package body EarthStation.Tracking is
    begin
       return Left = Right;
    end Compare_Elements;
+
+   ----------------------------
+   -- Get_Selected_Satellite --
+   ----------------------------
+
+   function Get_Selected_Satellite (This : in Data) return String is
+   begin
+      if This.Selected_Satellite = 0 then
+         return "";
+      else
+         declare
+            Temp	: constant Satellite_Data := 
+              Element (This.Satellites, This.Selected_Satellite);
+         begin
+            return To_String (Temp.Satellite_Id);
+         end;
+      end if;
+   exception
+      when CONSTRAINT_ERROR =>
+         return "";
+   end Get_Selected_Satellite;
 
    ----------------
    -- Initialize --
@@ -167,11 +202,12 @@ package body EarthStation.Tracking is
      (This			: in out Data;
       Satellite_Id		: in     String)
    is
+      Id			: constant String := To_Upper (Satellite_Id);
       Temp			: Satellite_Data;
    begin
       for i in First_Index (This.Satellites) .. Last_Index (This.Satellites) loop
          Temp := Element (This.Satellites, i);
-         if Temp.Satellite_Id = Satellite_Id then
+         if Temp.Satellite_Id = Id then
             This.Selected_Satellite := i;
             exit;
          end if;

@@ -36,6 +36,12 @@ package EarthStation.Tracking is
       Elements			: in     EarthStation.Predict.Keplerian_Elements);
    --  Adds a Satellite to the tracking list
 
+   procedure Clear (This : in out Data);
+   --  Clears list of tracked Satellites
+
+   function Get_Selected_Satellite (This : in Data) return String;
+   --  Returns Id of currently selected Satellite (or empty string if none)
+
    procedure Initialize
      (This			:    out Data;
       Groundstation_Name	: in     String;
