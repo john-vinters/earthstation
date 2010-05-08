@@ -2,7 +2,7 @@ EarthStation
 ------------
 
 John Vinters, G7NSN
-2-May-2010
+8-May-2010
 
 Introduction
 ------------
@@ -23,10 +23,13 @@ Requirements
    * GtkAda 2.14 or later.
 
    * FreeBSD or Linux.  (Other BSDs may work, but are currently untested).
+     EarthStation will currently compile and work under Windows, but this
+     isn't really supported (or a priority) and may break in future.
 
 License
 -------
 
-EarthStation is licensed under the GNU General Public License Version 3,
-or (at your option) any later version.  See the file COPYING for full details.
+EarthStation is licensed under the GNU General Public License Version 3 as
+published by the Free Software Foundation, or (at your option) any later 
+version.  See the file COPYING for full details.
 
