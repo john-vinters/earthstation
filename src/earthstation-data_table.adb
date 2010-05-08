@@ -198,7 +198,7 @@ package body EarthStation.Data_Table is
       Now		: constant Time := Clock;
    begin
       if Now < Next_AOS then
-         Set_Label (This.Next_AOS, " " & Image (Next_AOS));
+         Set_Label (This.Next_AOS, " " & Image (Next_AOS) & 'Z');
       else
          Set_Label (This.Next_AOS, " -");
       end if;
@@ -215,7 +215,7 @@ package body EarthStation.Data_Table is
       Now		: constant Time := Clock;
    begin
       if Now < Next_LOS then
-         Set_Label (This.Next_LOS, " " & Image (Next_LOS));
+         Set_Label (This.Next_LOS, " " & Image (Next_LOS) & 'Z');
       else
          Set_Label (This.Next_LOS, " -");
       end if;
