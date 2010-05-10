@@ -63,10 +63,13 @@ package body EarthStation.Map_Display is
       Time_Str		: constant String := "UTC: " & Image (UTC) & 'Z';
       Time_Str_Ht	: constant Gint := String_Height (Clock_Font, Time_Str);
       Time_Str_Len	: constant Gint := String_Width (Clock_Font, Time_Str);
-      X			: constant Gint := This.Current_Width - Time_Str_Len - 1;
-      Y			: constant Gint := Time_Str_Ht + 1;
+      X			: constant Gint := This.Current_Width - Time_Str_Len;
+      Y			: constant Gint := Time_Str_Ht;
    begin
       Gdk_New (GC, This.Screen_Image);
+      Set_Foreground (GC, Blue);
+      Draw_Rectangle
+        (This.Screen_Image, GC, True, X - 2, 0, Time_Str_Len + 2, Time_Str_Ht + 2);
       Set_Foreground (GC, White);
       Draw_Text (This.Screen_Image, Clock_Font, GC, X, Y, Time_Str);
       Unref (GC);
