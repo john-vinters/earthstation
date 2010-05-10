@@ -19,6 +19,7 @@
 
 pragma License (GPL);
 
+with Ada.Calendar.Formatting;		use Ada.Calendar.Formatting;
 with Ada.Numerics;			use Ada.Numerics;
 with Ada.Numerics.Long_Elementary_Functions;
 					use Ada.Numerics.Long_Elementary_Functions;
@@ -43,10 +44,33 @@ package body EarthStation.Map_Display is
    Cyan		: Gdk_Color := Gdk.Color.Parse ("Cyan");
    Green	: Gdk_Color := Gdk.Color.Parse ("Green");
    Red		: Gdk_Color := Gdk.Color.Parse ("Red");
+   White	: Gdk_Color := Gdk.Color.Parse ("White");
    Yellow	: Gdk_Color := Gdk.Color.Parse ("Yellow");
 
+   Clock_Font	: Gdk.Font.Gdk_Font;
    Grid_Font	: Gdk.Font.Gdk_Font;
    Id_Font	: Gdk.Font.Gdk_Font;
+
+   ----------------
+   -- Draw_Clock --
+   ----------------
+
+   procedure Draw_Clock
+     (This		: access Map_Display_Record'Class;
+      UTC		: in Time)
+   is
+      GC		: Gdk.GC.Gdk_GC;
+      Time_Str		: constant String := "UTC: " & Image (UTC) & 'Z';
+      Time_Str_Ht	: constant Gint := String_Height (Clock_Font, Time_Str);
+      Time_Str_Len	: constant Gint := String_Width (Clock_Font, Time_Str);
+      X			: constant Gint := This.Current_Width - Time_Str_Len - 1;
+      Y			: constant Gint := Time_Str_Ht + 1;
+   begin
+      Gdk_New (GC, This.Screen_Image);
+      Set_Foreground (GC, White);
+      Draw_Text (This.Screen_Image, Clock_Font, GC, X, Y, Time_Str);
+      Unref (GC);
+   end Draw_Clock;
 
    --------------------
    -- Draw_Footprint --
@@ -298,7 +322,9 @@ package body EarthStation.Map_Display is
       Alloc_Color (Get_Default_Colormap, Green, False, True, Success);
       Alloc_Color (Get_Default_Colormap, Red, False, True, Success);
       Alloc_Color (Get_Default_Colormap, Yellow, False, True, Success);
+      Alloc_Color (Get_Default_Colormap, White, False, True, Success);
 
+      Load (Clock_Font, "-*-lucidatypewriter-medium-r-*-*-12-*-*-*-*-*-*-*");
       Load (Grid_Font, "-*-lucidatypewriter-medium-r-*-*-9-*-*-*-*-*-*-*");
       Load (Id_Font, "-*-lucidatypewriter-medium-r-*-*-12-*-*-*-*-*-*-*");
 
@@ -384,10 +410,12 @@ package body EarthStation.Map_Display is
    ----------------
 
    procedure Update_End (This : access Map_Display_Record'Class) is
-      Junk		: constant Boolean := Expose (This);
-      pragma Unreferenced (Junk);
+      Now		: constant Time := Clock;
+      Junk		: Boolean;
    begin
-      null;
+      Draw_Clock (This, Now);
+      Junk := Expose (This);
+      pragma Unreferenced (Junk);
    end Update_End;
 
    ------------------

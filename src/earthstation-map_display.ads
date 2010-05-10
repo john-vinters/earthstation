@@ -19,6 +19,7 @@
 
 pragma License (GPL);
 
+with Ada.Calendar;			use Ada.Calendar;
 with Gdk.Color;				use Gdk.Color;
 with Gdk.Pixbuf;			use Gdk.Pixbuf;
 with Gdk.Pixmap;			use Gdk.Pixmap;
@@ -30,6 +31,11 @@ package EarthStation.Map_Display is
 
    type Map_Display_Record is new Gtk_Box_Record with private;
    type Map_Display is access all Map_Display_Record'Class;
+
+   procedure Draw_Clock
+     (This		: access Map_Display_Record'Class;
+      UTC		: in Time);
+   --  Draws the clock.
 
    procedure Draw_Footprint
      (This		: access Map_Display_Record'Class;
