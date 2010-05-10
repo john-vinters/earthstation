@@ -196,9 +196,11 @@ package body EarthStation.Data_Table is
       Next_AOS		: in     Ada.Calendar.Time)
    is
       Now		: constant Time := Clock;
+      Diff		: constant Duration := Next_AOS - Now;
    begin
       if Now < Next_AOS then
-         Set_Label (This.Next_AOS, " " & Image (Next_AOS) & 'Z');
+         Set_Label (This.Next_AOS, " " & Image (Next_AOS) & "Z (in " 
+           & Image (Diff) & ')');
       else
          Set_Label (This.Next_AOS, " -");
       end if;
@@ -213,9 +215,11 @@ package body EarthStation.Data_Table is
       Next_LOS		: in     Ada.Calendar.Time)
    is
       Now		: constant Time := Clock;
+      Diff		: constant Duration := Next_LOS - Now;
    begin
       if Now < Next_LOS then
-         Set_Label (This.Next_LOS, " " & Image (Next_LOS) & 'Z');
+         Set_Label (This.Next_LOS, " " & Image (Next_LOS) & "Z (in " 
+           & Image (Diff) & ')');
       else
          Set_Label (This.Next_LOS, " -");
       end if;
