@@ -35,6 +35,7 @@ package body EarthStation.Main_Window is
    package Menu_Item_Callback is new Handlers.Callback (Gtk_Menu_Item_Record);
    package Window_Callback is new Handlers.Callback (Gtk_Widget_Record);
 
+   Data				: access EarthStation.Tracking.Data;
    Shutting_Down		: Boolean := False;
 
    ---------------
@@ -80,6 +81,15 @@ package body EarthStation.Main_Window is
 
       return True;
    end Handle_Timeout;
+
+   ------------------------------
+   -- Handle_Track_Menu_Select --
+   ------------------------------
+
+   procedure Handle_Track_Menu_Select (Object : access Gtk_Menu_Item_Record'Class) is
+   begin
+      EarthStation.Tracking.Select_Satellite (Data.all, Object);
+   end Handle_Track_Menu_Select;
 
    ----------------
    -- Initialize --
@@ -158,8 +168,10 @@ package body EarthStation.Main_Window is
       Create_Keplerian_Elements_Directory;
       Create_Preferences_Directory;
 
+      Data := This.Data'Access;
+
       This.Active_Track_Menu := EarthStation.Tracking.Allocate_Track_Menu
-        (This.Data'Access, Null);
+        (This.Data'Access, Handle_Track_Menu_Select'Access);
       Set_Submenu (This.Active_Track, This.Active_Track_Menu);
    end Initialize;
 

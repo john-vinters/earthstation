@@ -62,6 +62,9 @@ private
    function Handle_Timeout (This : in Main_Window) return Boolean;
    --  Timer tick handler (updates display)
 
+   procedure Handle_Track_Menu_Select (Object : access Gtk_Menu_Item_Record'Class);
+   --  Handles Active Track Menu selections
+
    procedure Show_About_Box (Object : access Gtk_Menu_Item_Record'Class);
    --  Shows the About Box dialogue box
 
