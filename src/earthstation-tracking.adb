@@ -104,6 +104,12 @@ package body EarthStation.Tracking is
       end loop;
 
       Info.Next_Check := T;
+
+      T := Clock;
+      Info.Sat_Vectors := EarthStation.Predict.Calculate_Satellite_Vectors
+        (Info.Satellite, Dn, Df);
+      Info.Rng_Vectors := EarthStation.Predict.Calculate_Range_Vectors
+        (This.Groundstation, Info.Sat_Vectors);
    end Calculate_Next_AOS_LOS;
 
    -----------
