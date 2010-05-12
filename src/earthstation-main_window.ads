@@ -21,6 +21,7 @@ pragma License (GPL);
 
 with EarthStation.Data_Table;		use EarthStation.Data_Table;
 with EarthStation.Map_Display;		use EarthStation.Map_Display;
+with EarthStation.Tracking;		use EarthStation.Tracking;
 with Gtk.Box;				use Gtk.Box;
 with Gtk.Menu;				use Gtk.Menu;
 with Gtk.Menu_Bar;			use Gtk.Menu_Bar;
@@ -41,6 +42,9 @@ package EarthStation.Main_Window is
 private
 
    type Main_Window_Record is new Gtk_Window_Record with record
+      Active_Track	: Gtk_Menu_Item;
+      Active_Track_Menu	: Gtk_Menu;
+      Data		: aliased EarthStation.Tracking.Data;
       File_Menu		: Gtk_Menu;
       Help_Menu		: Gtk_Menu;
       Map		: Map_Display.Map_Display;
@@ -48,6 +52,7 @@ private
       Satellite_Data	: Data_Table.Data_Table;
       Status_Bar	: Gtk_Status_Bar;
       VBox		: Gtk_Box;
+      View_Menu		: Gtk_Menu;
    end record;
 
    procedure Exit_Main (Object : access Gtk_Menu_Item_Record'Class);

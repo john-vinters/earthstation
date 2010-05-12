@@ -19,9 +19,9 @@
 
 pragma License (GPL);
 
-with Ada.Calendar;			use Ada.Calendar;
-with Ada.Calendar.Formatting;		use Ada.Calendar.Formatting;
 with EarthStation.About_Box;		use EarthStation.About_Box;
+with EarthStation.Platform;		use EarthStation.Platform;
+with EarthStation.Predict;		use EarthStation.Predict;
 with Glib;				use Glib;
 with Glib.Main;				use Glib.Main;
 with Gtk;				use Gtk;
@@ -70,18 +70,13 @@ package body EarthStation.Main_Window is
    --------------------
 
    function Handle_Timeout (This : in Main_Window) return Boolean is
-      Now		: constant Time := Clock;
    begin
-      declare
-         Junk		: Message_Id;
-         Time_String	: constant String := "  UTC: " & Image (Now) & "Z";
-      begin
-         if not Shutting_Down then
-            Pop (This.Status_Bar, 0);
-            Junk := Push (This.Status_Bar, 0, Time_String);
-            pragma Unreferenced (Junk);
-         end if;
-      end;
+      if not Shutting_Down then
+         EarthStation.Map_Display.Update_Start (This.Map);
+         EarthStation.Tracking.Update_Display
+           (This.Data, This.Map, This.Satellite_Data);
+         EarthStation.Map_Display.Update_End (This.Map);
+      end if;
 
       return True;
    end Handle_Timeout;
@@ -119,6 +114,15 @@ package body EarthStation.Main_Window is
       Append (This.Menu_Bar, Menu_Item);
       Set_Submenu (Menu_Item, This.File_Menu);
 
+      --  View Menu
+      Gtk_New (This.View_Menu);
+      Gtk_New_With_Mnemonic (This.Active_Track, "_Active Track");
+      Append (This.View_Menu, This.Active_Track);
+     
+      Gtk_New_With_Mnemonic (Menu_Item, "_View");
+      Append (This.Menu_Bar, Menu_Item);
+      Set_Submenu (Menu_Item, This.View_Menu);
+
       --  Help Menu
       Gtk_New (This.Help_Menu);
       Gtk_New_With_Mnemonic (Menu_Item, "_About");
@@ -141,7 +145,22 @@ package body EarthStation.Main_Window is
       Add (This, This.VBox);
 
       Timeout := Main_Window_Timeout.Timeout_Add
-        (1000, Handle_Timeout'Access, Main_Window (This));
+        (500, Handle_Timeout'Access, Main_Window (This));
+
+      EarthStation.Tracking.Initialize
+        (This			=> This.Data,
+         Groundstation_Name	=> "Halifax",
+         Latitude		=> 53.73,
+         Longitude		=> -1.86,
+         Height			=> 2500.0);
+
+      Create_Home_Directory;
+      Create_Keplerian_Elements_Directory;
+      Create_Preferences_Directory;
+
+      This.Active_Track_Menu := EarthStation.Tracking.Allocate_Track_Menu
+        (This.Data'Access, Null);
+      Set_Submenu (This.Active_Track, This.Active_Track_Menu);
    end Initialize;
 
    --------------------
