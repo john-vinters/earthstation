@@ -25,16 +25,29 @@ with Ada.Strings.Unbounded;		use Ada.Strings.Unbounded;
 with EarthStation.Data_Table;		use EarthStation.Data_Table;
 with EarthStation.Map_Display;		use EarthStation.Map_Display;
 with EarthStation.Predict;		use EarthStation.Predict;
+with Gtk.Handlers;			use Gtk.Handlers;
+with Gtk.Menu;				use Gtk.Menu;
+with Gtk.Menu_Item;			use Gtk.Menu_Item;
 
 package EarthStation.Tracking is
 
    type Data is private;
+
+   package Menu_Item_Callback is new Gtk.Handlers.Callback
+     (Gtk_Menu_Item_Record);
 
    procedure Add_Satellite
      (This			: in out Data;
       Id			: in     String;
       Elements			: in     EarthStation.Predict.Keplerian_Elements);
    --  Adds a Satellite to the tracking list
+
+   function Allocate_Track_Menu
+     (This			: access Data;
+      Handler			: in Menu_Item_Callback.Marshallers.Void_Marshaller.Handler)
+     return Gtk_Menu;
+   --  Allocates a new Track Menu; should be called after calls to Add_Satellite
+   --  or Clear.
 
    procedure Clear (This : in out Data);
    --  Clears list of tracked Satellites
@@ -49,6 +62,12 @@ package EarthStation.Tracking is
       Longitude			: in     Long_Float;
       Height			: in     Long_Float);
    --  Initializes tracking - sets up groundstation details
+
+   procedure Select_Satellite
+     (This			: in out Data;
+      Menu_Item			: access Gtk_Menu_Item_Record'Class);
+   --  Selects a Satellite given a Menu Item.  If Satellite can't be found,
+   --  then the current selection is left as-is.     
 
    procedure Select_Satellite
      (This			: in out Data;
@@ -69,6 +88,7 @@ private
 
    type Satellite_Data is record
       Max_Elevation		: Long_Float := 0.0;
+      Menu_Item			: Gtk_Menu_Item;
       Next_AOS			: Ada.Calendar.Time;
       Next_Check		: Ada.Calendar.Time;
       Next_LOS			: Ada.Calendar.Time;

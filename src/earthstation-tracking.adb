@@ -59,6 +59,37 @@ package body EarthStation.Tracking is
       end if;
    end Add_Satellite;
 
+   -------------------------
+   -- Allocate_Track_Menu --
+   -------------------------
+
+   function Allocate_Track_Menu
+     (This			: access Data;
+      Handler			: in Menu_Item_Callback.Marshallers.Void_Marshaller.Handler)
+     return Gtk_Menu
+   is
+      Track_Menu		: Gtk_Menu;
+
+      procedure Iterate_Proc (Cursor : Satellite_Vector.Cursor) is
+         Item	: Satellite_Data := Element (Cursor);
+      begin
+         if Item.Menu_Item /= null then
+            Unref (Item.Menu_Item);
+         end if;
+
+         Gtk_New (Item.Menu_Item, To_String (Item.Satellite_Id));
+         Menu_Item_Callback.Connect
+           (Item.Menu_Item, "activate", Menu_Item_Callback.To_Marshaller (Handler));
+         Append (Track_Menu, Item.Menu_Item);
+         Replace_Element (This.Satellites, Cursor, Item);
+      end Iterate_Proc;
+
+   begin
+      Gtk_New (Track_Menu);
+      Iterate (This.Satellites, Iterate_Proc'Access);
+      return Track_Menu;
+   end Allocate_Track_Menu;
+
    ----------------------------
    -- Calculate_Next_AOS_LOS --
    ----------------------------
@@ -203,6 +234,22 @@ package body EarthStation.Tracking is
    ----------------------
    -- Select_Satellite --
    ----------------------
+
+   procedure Select_Satellite
+     (This			: in out Data;
+      Menu_Item			: access Gtk_Menu_Item_Record'Class)
+   is
+      Temp			: Satellite_Data;
+   begin
+      for i in First_Index (This.Satellites) .. Last_Index (This.Satellites) loop
+         Temp := Element (This.Satellites, i);
+         if Temp.Menu_Item = Menu_Item then
+            This.Selected_Satellite := i;
+            exit;
+         end if;
+      end loop;
+   end Select_Satellite;
+
 
    procedure Select_Satellite
      (This			: in out Data;
