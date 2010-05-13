@@ -64,7 +64,7 @@ package body EarthStation.Tracking is
    -------------------------
 
    function Allocate_Track_Menu
-     (This			: access Data;
+     (This			: in Data_Access;
       Handler			: in Menu_Item_Callback.Marshallers.Void_Marshaller.Handler)
      return Gtk_Menu
    is
@@ -79,7 +79,10 @@ package body EarthStation.Tracking is
 
          Gtk_New (Item.Menu_Item, To_String (Item.Satellite_Id));
          Menu_Item_Callback.Connect
-           (Item.Menu_Item, "activate", Menu_Item_Callback.To_Marshaller (Handler));
+           (Item.Menu_Item,
+            "activate",
+            Menu_Item_Callback.Marshallers.Void_Marshaller.To_Marshaller (Handler), 
+            User_Data => This);
          Append (Track_Menu, Item.Menu_Item);
          Replace_Element (This.Satellites, Cursor, Item);
       end Iterate_Proc;

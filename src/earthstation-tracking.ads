@@ -32,9 +32,10 @@ with Gtk.Menu_Item;			use Gtk.Menu_Item;
 package EarthStation.Tracking is
 
    type Data is private;
+   type Data_Access is access all Data;
 
-   package Menu_Item_Callback is new Gtk.Handlers.Callback
-     (Gtk_Menu_Item_Record);
+   package Menu_Item_Callback is new Gtk.Handlers.User_Callback
+     (Gtk_Menu_Item_Record, Data_Access);
 
    procedure Add_Satellite
      (This			: in out Data;
@@ -43,7 +44,7 @@ package EarthStation.Tracking is
    --  Adds a Satellite to the tracking list
 
    function Allocate_Track_Menu
-     (This			: access Data;
+     (This			: in Data_Access;
       Handler			: in Menu_Item_Callback.Marshallers.Void_Marshaller.Handler)
      return Gtk_Menu;
    --  Allocates a new Track Menu; should be called after calls to Add_Satellite
