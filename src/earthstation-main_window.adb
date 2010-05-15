@@ -25,8 +25,10 @@ with EarthStation.Predict;		use EarthStation.Predict;
 with Glib;				use Glib;
 with Glib.Main;				use Glib.Main;
 with Gtk;				use Gtk;
+with Gtk.Dialog;			use Gtk.Dialog;
 with Gtk.Enums;				use Gtk.Enums;
 with Gtk.Handlers;			use Gtk.Handlers;
+with Gtk.Message_Dialog;		use Gtk.Message_Dialog;
 with Gtk.Main;				use Gtk.Main;
 
 package body EarthStation.Main_Window is
@@ -156,7 +158,24 @@ package body EarthStation.Main_Window is
 
       Add (This, This.VBox);
 
-      EarthStation.Preferences.Initialize (This.Preferences);
+      begin
+         EarthStation.Preferences.Initialize (This.Preferences);
+      exception
+         when others =>
+            declare
+               Msg_Dlg	: Gtk_Message_Dialog;
+               R	: Gtk_Response_Type;
+            begin 
+               Gtk_New
+                 (Msg_Dlg,
+                  Parent 	=> Gtk_Window (This),
+                  Typ		=> Message_Warning,
+                  Message 	=> "Unable to load preferences - using defaults.");
+               R := Run (Msg_Dlg);
+               pragma Unreferenced (R);
+               Destroy (Msg_Dlg);
+            end;
+      end;
 
       EarthStation.Tracking.Initialize
         (This			=> This.Data,
