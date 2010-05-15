@@ -98,7 +98,6 @@ package body EarthStation.Main_Window is
    ----------------
 
    procedure Initialize (This : access Main_Window_Record'Class) is
-      K			: Keplerian_Elements;
       Menu_Item		: Gtk_Menu_Item;
       Timeout		: G_Source_Id;
       pragma Unreferenced (Timeout);
@@ -157,19 +156,19 @@ package body EarthStation.Main_Window is
 
       Add (This, This.VBox);
 
-      Timeout := Main_Window_Timeout.Timeout_Add
-        (500, Handle_Timeout'Access, Main_Window (This));
+      EarthStation.Preferences.Initialize (This.Preferences);
 
       EarthStation.Tracking.Initialize
         (This			=> This.Data,
-         Groundstation_Name	=> "Halifax",
-         Latitude		=> 53.73,
-         Longitude		=> -1.86,
-         Height			=> 2500.0);
+         Groundstation_Name	=> Get_Groundstation_Name (This.Preferences),
+         Latitude		=> Get_Groundstation_Latitude (This.Preferences),
+         Longitude		=> Get_Groundstation_Longitude (This.Preferences),
+         Height			=> Get_Groundstation_Height (This.Preferences));
 
-      Create_Home_Directory;
+      Timeout := Main_Window_Timeout.Timeout_Add
+        (500, Handle_Timeout'Access, Main_Window (This));
+
       Create_Keplerian_Elements_Directory;
-      Create_Preferences_Directory;
 
       This.Active_Track_Menu := EarthStation.Tracking.Allocate_Track_Menu
         (This.Data'Access, Handle_Track_Menu_Select'Access);

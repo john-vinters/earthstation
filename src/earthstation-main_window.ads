@@ -21,6 +21,7 @@ pragma License (GPL);
 
 with EarthStation.Data_Table;		use EarthStation.Data_Table;
 with EarthStation.Map_Display;		use EarthStation.Map_Display;
+with EarthStation.Preferences;		use EarthStation.Preferences;
 with EarthStation.Tracking;		use EarthStation.Tracking;
 with Gtk.Box;				use Gtk.Box;
 with Gtk.Menu;				use Gtk.Menu;
@@ -49,6 +50,7 @@ private
       Help_Menu		: Gtk_Menu;
       Map		: Map_Display.Map_Display;
       Menu_Bar		: Gtk_Menu_Bar;
+      Preferences	: EarthStation.Preferences.Pref_Data;
       Satellite_Data	: Data_Table.Data_Table;
       Status_Bar	: Gtk_Status_Bar;
       VBox		: Gtk_Box;
