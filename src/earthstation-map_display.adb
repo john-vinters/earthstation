@@ -256,15 +256,15 @@ package body EarthStation.Map_Display is
       GC		: Gdk.GC.Gdk_GC;
       Px, Py		: Gint;
    begin
-      Gdk_New (GC, This.Scaled_Map);
+      Gdk_New (GC, This.Screen_Image);
       Set_Foreground (GC, Colour);
 
       Px := Longitude_To_X (This, Longitude);
       Py := Latitude_To_Y (This, Latitude);
 
-      Draw_Rectangle (This.Scaled_Map, GC, True, Px - 1, Py - 1, 3, 3);
+      Draw_Rectangle (This.Screen_Image, GC, True, Px - 1, Py - 1, 3, 3);
       if Id'Length > 0 then
-         Draw_Text (This.Scaled_Map, Id_Font, GC, Px + 5, Py, Id);
+         Draw_Text (This.Screen_Image, Id_Font, GC, Px + 5, Py, Id);
       end if;
 
       Unref (GC);
