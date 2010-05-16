@@ -105,6 +105,8 @@ package body EarthStation.Main_Window is
                Set_Groundstation_Height
                  (User_Data.Preferences, ESGD.Get_Height (GS_Dialogue));
                exit;
+            else
+               exit;
             end if;
          exception
             when CONSTRAINT_ERROR =>
