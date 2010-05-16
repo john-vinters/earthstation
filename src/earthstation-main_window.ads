@@ -46,6 +46,7 @@ private
       Active_Track	: Gtk_Menu_Item;
       Active_Track_Menu	: Gtk_Menu;
       Data		: aliased EarthStation.Tracking.Data;
+      Edit_Menu		: Gtk_Menu;
       File_Menu		: Gtk_Menu;
       Help_Menu		: Gtk_Menu;
       Map		: Map_Display.Map_Display;
@@ -60,6 +61,11 @@ private
    procedure Exit_Main (Object : access Gtk_Menu_Item_Record'Class);
    procedure Exit_Main (Object : access Gtk_Widget_Record'Class);
    --  "destroy" event handler for when main window is closed by user
+
+   procedure Handle_Groundstation_Menu_Select
+     (Object		: access Gtk_Menu_Item_Record'Class;
+      User_Data		: in     Main_Window);
+   --  Handles Groundstation Menu selections
 
    function Handle_Timeout (This : in Main_Window) return Boolean;
    --  Timer tick handler (updates display)

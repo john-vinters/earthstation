@@ -20,6 +20,8 @@
 pragma License (GPL);
 
 with EarthStation.About_Box;		use EarthStation.About_Box;
+with EarthStation.Groundstation_Dialogue;
+					use EarthStation.Groundstation_Dialogue;
 with EarthStation.Platform;		use EarthStation.Platform;
 with EarthStation.Predict;		use EarthStation.Predict;
 with Glib;				use Glib;
@@ -35,6 +37,8 @@ package body EarthStation.Main_Window is
 
    package Main_Window_Timeout is new Glib.Main.Generic_Sources (Main_Window);
    package Menu_Item_Callback is new Handlers.Callback (Gtk_Menu_Item_Record);
+   package Menu_Item_Window_Callback is new Gtk.Handlers.User_Callback
+     (Gtk_Menu_Item_Record, Main_Window);
    package Window_Callback is new Handlers.Callback (Gtk_Widget_Record);
 
    Shutting_Down		: Boolean := False;
@@ -66,6 +70,88 @@ package body EarthStation.Main_Window is
       This := new Main_Window_Record;
       Initialize (This);
    end Gtk_New;
+
+   --------------------------------------
+   -- Handle_Groundstation_Menu_Select --
+   --------------------------------------
+
+   procedure Handle_Groundstation_Menu_Select
+     (Object		: access Gtk_Menu_Item_Record'Class;
+      User_Data		: in     Main_Window)
+   is
+      pragma Unreferenced (Object);
+      package ESGD renames EarthStation.Groundstation_Dialogue;
+      GS_Dialogue	: ESGD.Groundstation_Dialogue;
+   begin
+      Gtk_New (GS_Dialogue);
+      ESGD.Set_GS_Name
+        (GS_Dialogue, Get_Groundstation_Name (User_Data.Preferences));
+      ESGD.Set_Latitude
+        (GS_Dialogue, Get_Groundstation_Latitude (User_Data.Preferences));
+      ESGD.Set_Longitude
+        (GS_Dialogue, Get_Groundstation_Longitude (User_Data.Preferences));
+      ESGD.Set_Height
+        (GS_Dialogue, Get_Groundstation_Height (User_Data.Preferences));
+
+      loop
+         begin
+            if Run (GS_Dialogue) = Gtk_Response_OK then
+               Set_Groundstation_Name
+                 (User_Data.Preferences, ESGD.Get_GS_Name (GS_Dialogue));
+               Set_Groundstation_Latitude
+                 (User_Data.Preferences, ESGD.Get_Latitude (GS_Dialogue));
+               Set_Groundstation_Longitude
+                 (User_Data.Preferences, ESGD.Get_Longitude (GS_Dialogue));
+               Set_Groundstation_Height
+                 (User_Data.Preferences, ESGD.Get_Height (GS_Dialogue));
+               exit;
+            end if;
+         exception
+            when CONSTRAINT_ERROR =>
+               declare
+                  Msg_Dlg	: Gtk_Message_Dialog;
+                  R		: Gtk_Response_Type;
+               begin
+                  Gtk_New
+                   (Msg_Dlg, 
+                    Parent	=> Gtk_Window (User_Data),
+                    Typ		=> Message_Error,
+                    Message	=> "Invalid value");
+                  R := Run (Msg_Dlg);
+                  pragma Unreferenced (R);
+                  Destroy (Msg_Dlg);
+               end;
+         end;
+      end loop;
+
+      EarthStation.Tracking.Initialize
+        (This			=> User_Data.Data,
+         Groundstation_Name	=> Get_Groundstation_Name (User_Data.Preferences),
+         Latitude		=> Get_Groundstation_Latitude (User_Data.Preferences),
+         Longitude		=> Get_Groundstation_Longitude (User_Data.Preferences),
+         Height			=> Get_Groundstation_Height (User_Data.Preferences));
+
+      begin
+         Save_Preferences (User_Data.Preferences);
+      exception
+         when others =>
+            declare
+               Msg_Dlg		: Gtk_Message_Dialog;
+               R		: Gtk_Response_Type;
+            begin
+               Gtk_New
+                 (Msg_Dlg,
+                  Parent	=> Gtk_Window (User_Data),
+                  Typ		=> Message_Warning,
+                  Message	=> "Unable to save preferences");
+               R := Run (Msg_Dlg);
+               pragma Unreferenced (R);
+               Destroy (Msg_Dlg);
+            end;
+      end;
+
+      Destroy (GS_Dialogue);
+   end Handle_Groundstation_Menu_Select;
 
    --------------------
    -- Handle_Timeout --
@@ -127,6 +213,20 @@ package body EarthStation.Main_Window is
       Gtk_New_With_Mnemonic (Menu_Item, "_File");
       Append (This.Menu_Bar, Menu_Item);
       Set_Submenu (Menu_Item, This.File_Menu);
+
+      --  Edit Menu
+      Gtk_New (This.Edit_Menu);
+      Gtk_New_With_Mnemonic (Menu_Item, "_Groundstation...");
+      Menu_Item_Window_Callback.Connect
+        (Menu_Item, 
+         "activate", 
+         Menu_Item_Window_Callback.Marshallers.Void_Marshaller.To_Marshaller
+          (Handle_Groundstation_Menu_Select'Access), User_Data => Main_Window (This));
+      Append (This.Edit_Menu, Menu_Item);
+
+      Gtk_New_With_Mnemonic (Menu_Item, "_Edit");
+      Append (This.Menu_Bar, Menu_Item);
+      Set_Submenu (Menu_Item, This.Edit_Menu);
 
       --  View Menu
       Gtk_New (This.View_Menu);
