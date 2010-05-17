@@ -286,14 +286,16 @@ package body EarthStation.Main_Window is
          Longitude		=> Get_Groundstation_Longitude (This.Preferences),
          Height			=> Get_Groundstation_Height (This.Preferences));
 
-      Timeout := Main_Window_Timeout.Timeout_Add
-        (500, Handle_Timeout'Access, Main_Window (This));
-
       Create_Keplerian_Elements_Directory;
 
       This.Active_Track_Menu := EarthStation.Tracking.Allocate_Track_Menu
         (This.Data'Access, Handle_Track_Menu_Select'Access);
       Set_Submenu (This.Active_Track, This.Active_Track_Menu);
+
+      Show_All (This);
+
+      Timeout := Main_Window_Timeout.Timeout_Add
+        (500, Handle_Timeout'Access, Main_Window (This));
    end Initialize;
 
    --------------------
