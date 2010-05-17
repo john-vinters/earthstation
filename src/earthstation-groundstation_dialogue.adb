@@ -21,6 +21,7 @@ pragma License (GPL);
 
 with Ada.Strings;			use Ada.Strings;
 with Ada.Strings.Fixed;			use Ada.Strings.Fixed;
+with Glib;				use Glib;
 with Gtk.Button;			use Gtk.Button;
 with Gtk.Enums;				use Gtk.Enums;
 with Gtk.Label;				use Gtk.Label;
@@ -172,6 +173,7 @@ package body EarthStation.Groundstation_Dialogue is
    is
    begin
       Set_Text (This.Groundstation_Name, Name);
+      Set_Position (This.Groundstation_Name, -1);
    end Set_GS_Name;
 
    ----------------
