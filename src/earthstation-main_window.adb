@@ -202,7 +202,7 @@ package body EarthStation.Main_Window is
       Gtk_New (This.Status_Bar);
 
       Set_Title (This, "EarthStation");
-      Set_Default_Size (This, 800, 600);
+      Set_Default_Size (This, 800, 500);
       Set_Position (This, Win_Pos_Center);
 
       --  Setup main menu

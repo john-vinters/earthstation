@@ -35,6 +35,7 @@ package body EarthStation.About_Box is
       Dialog	: Gtk_About_Dialog;
    begin
       Gtk_New (Dialog);
+      Set_Position (Dialog, Win_Pos_Center);
       Set_Destroy_With_Parent (Dialog, True);
       Set_Modal (Dialog, True);
       Set_Comments (Dialog, "Satellite Tracker");

@@ -22,6 +22,7 @@ pragma License (GPL);
 with Ada.Strings;			use Ada.Strings;
 with Ada.Strings.Fixed;			use Ada.Strings.Fixed;
 with Gtk.Button;			use Gtk.Button;
+with Gtk.Enums;				use Gtk.Enums;
 with Gtk.Label;				use Gtk.Label;
 with Gtk.Table;				use Gtk.Table;
 with Gtk.Widget;			use Gtk.Widget;
@@ -153,6 +154,7 @@ package body EarthStation.Groundstation_Dialogue is
       Set_Flags (Button, Can_Default);
       Add_Action_Widget (This, Button, Gtk_Response_OK);
 
+      Set_Position (This, Win_Pos_Center);
       Show_All (This);
    end Initialize;
 
