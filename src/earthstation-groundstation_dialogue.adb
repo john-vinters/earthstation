@@ -106,6 +106,7 @@ package body EarthStation.Groundstation_Dialogue is
       Attach (Table, Label, 0, 1, 0, 1);
 
       Gtk_New (This.Groundstation_Name);
+      Set_Max_Length (This.Groundstation_Name, 255);
       Set_Width_Chars (This.Groundstation_Name, 8);
       Attach (Table, This.Groundstation_Name, 1, 3, 0, 1);
 
@@ -115,6 +116,7 @@ package body EarthStation.Groundstation_Dialogue is
       Attach (Table, Label, 0, 1, 1, 2);
 
       Gtk_New (This.Groundstation_Latitude);
+      Set_Max_Length (This.Groundstation_Latitude, 8);
       Set_Width_Chars (This.Groundstation_Latitude, 5);
       Attach (Table, This.Groundstation_Latitude, 1, 2, 1, 2);
 
@@ -128,6 +130,7 @@ package body EarthStation.Groundstation_Dialogue is
       Attach (Table, Label, 0, 1, 2, 3);
 
       Gtk_New (This.Groundstation_Longitude);
+      Set_Max_Length (This.Groundstation_Longitude, 8);
       Set_Width_Chars (This.Groundstation_Longitude, 5);
       Attach (Table, This.Groundstation_Longitude, 1, 2, 2, 3);
 
@@ -141,6 +144,7 @@ package body EarthStation.Groundstation_Dialogue is
       Attach (Table, Label, 0, 1, 3, 4);
 
       Gtk_New (This.Groundstation_Height);
+      Set_Max_Length (This.Groundstation_Height, 4);
       Set_Width_Chars (This.Groundstation_Height, 4);
       Attach (Table, This.Groundstation_Height, 1, 2, 3, 4);
 
