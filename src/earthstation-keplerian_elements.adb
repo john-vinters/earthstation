@@ -278,6 +278,33 @@ package body EarthStation.Keplerian_Elements is
          raise;
    end Save;
 
+   ------------------------
+   -- TLE_Checksum_Valid --
+   ------------------------
+
+   function TLE_Checksum_Valid (This : in String) return Boolean is
+      Char	: Character;
+      Sum	: Natural := 0;
+      Zero_Pos	: constant Natural := Character'Pos ('0');
+   begin
+      if This'Length /= 69 then
+         return False;
+      else
+         for i in This'First .. This'Last - 1 loop
+            Char := This (i);
+            if Char in '0'..'9' then
+               Sum := Sum + (Character'Pos (Char) - Zero_Pos);
+            elsif Char = '-' then
+               Sum := Sum + 1;
+            end if;
+         end loop;
+
+         Sum := Sum mod 10;
+         Char := Character'Val (Sum + Zero_Pos);
+         return Char = This (This'Last);
+      end if;
+   end TLE_Checksum_Valid;
+
    -------------------------------
    -- TLE_To_Keplerian_Elements --
    -------------------------------

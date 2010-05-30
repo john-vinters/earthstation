@@ -48,6 +48,10 @@ package EarthStation.Keplerian_Elements is
    --  May raise exceptions if elements can't be saved, or CONSTRAINT_ERROR
    --  if the name is an empty string.
 
+   function TLE_Checksum_Valid (This : in String) return Boolean;
+   --  Checks that the TLE Checksum is valid.  Returns True if so, false 
+   --  otherwise.
+
    function TLE_To_Keplerian_Elements
      (Line_1	: in String;
       Line_2	: in String) return EarthStation.Predict.Keplerian_Elements;
