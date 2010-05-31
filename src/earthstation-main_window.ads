@@ -19,11 +19,13 @@
 
 pragma License (GPL);
 
+with Ada.Strings.Unbounded;		use Ada.Strings.Unbounded;
 with EarthStation.Data_Table;		use EarthStation.Data_Table;
 with EarthStation.Map_Display;		use EarthStation.Map_Display;
 with EarthStation.Preferences;		use EarthStation.Preferences;
 with EarthStation.Tracking;		use EarthStation.Tracking;
 with Gtk.Box;				use Gtk.Box;
+with Gtk.File_Selection;		use Gtk.File_Selection;
 with Gtk.Menu;				use Gtk.Menu;
 with Gtk.Menu_Bar;			use Gtk.Menu_Bar;
 with Gtk.Menu_Item;			use Gtk.Menu_Item;
@@ -67,6 +69,21 @@ private
       User_Data		: in     Main_Window);
    --  Handles Groundstation Menu selections
 
+   procedure Handle_Import_TLE
+     (Object		: access Gtk_Menu_Item_Record'Class;
+      User_Data		: in     Main_Window);
+   --  Handles Import TLE selection from main menu.
+   --  Asks user for a TLE file and imports Keplerian Elements from that
+   --  file.
+
+   procedure Handle_Import_TLE_Cancel
+     (Object : access Gtk_File_Selection_Record'Class);
+   --  Handles 'Cancel' button click from import TLE dialogue.
+
+   procedure Handle_Import_TLE_OK
+     (Object : access Gtk_File_Selection_Record'Class);
+   --  Handles 'OK' button click from import TLE dialogue.
+
    function Handle_Timeout (This : in Main_Window) return Boolean;
    --  Timer tick handler (updates display)
 
@@ -74,6 +91,12 @@ private
      (Object		: access Gtk_Menu_Item_Record'Class;
       User_Data		: in     EarthStation.Tracking.Data_Access);
    --  Handles Active Track Menu selections
+
+   function Looks_Like_TLE
+     (Name		: in Unbounded_String;
+      Line_1		: in Unbounded_String;
+      Line_2		: in Unbounded_String) return Boolean;
+   --  Returns true if the given lines look like a TLE element
 
    procedure Show_About_Box (Object : access Gtk_Menu_Item_Record'Class);
    --  Shows the About Box dialogue box

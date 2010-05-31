@@ -19,14 +19,18 @@
 
 pragma License (GPL);
 
+with Ada.IO_Exceptions;
+with Ada.Text_IO;			use Ada.Text_IO;
 with EarthStation.About_Box;		use EarthStation.About_Box;
 with EarthStation.Groundstation_Dialogue;
 					use EarthStation.Groundstation_Dialogue;
+with EarthStation.Keplerian_Elements;	use EarthStation.Keplerian_Elements;
 with EarthStation.Platform;		use EarthStation.Platform;
 with EarthStation.Predict;		use EarthStation.Predict;
 with Glib;				use Glib;
 with Glib.Main;				use Glib.Main;
 with Gtk;				use Gtk;
+with Gtk.Button;			use Gtk.Button;
 with Gtk.Dialog;			use Gtk.Dialog;
 with Gtk.Enums;				use Gtk.Enums;
 with Gtk.Handlers;			use Gtk.Handlers;
@@ -35,9 +39,10 @@ with Gtk.Main;				use Gtk.Main;
 
 package body EarthStation.Main_Window is
 
+   package File_Callback is new Handlers.Callback (Gtk_File_Selection_Record);
    package Main_Window_Timeout is new Glib.Main.Generic_Sources (Main_Window);
    package Menu_Item_Callback is new Handlers.Callback (Gtk_Menu_Item_Record);
-   package Menu_Item_Window_Callback is new Gtk.Handlers.User_Callback
+   package Menu_Item_Window_Callback is new Handlers.User_Callback
      (Gtk_Menu_Item_Record, Main_Window);
    package Window_Callback is new Handlers.Callback (Gtk_Widget_Record);
 
@@ -60,6 +65,21 @@ package body EarthStation.Main_Window is
       Shutting_Down := True;
       Main_Quit;
    end Exit_Main;
+
+   ----------------
+   -- Get_String --
+   ----------------
+
+   function Get_String
+     (File		: access File_Type;
+      Max_Length	: in Positive := 256) return String
+   is
+      Line_Length	: Natural;
+      Temp_String	: String (1 .. Max_Length);
+   begin
+      Get_Line (File.all, Temp_String, Line_Length);
+      return Trim_Nonprint (Temp_String (1 .. Line_Length));
+   end Get_String;
 
    -------------
    -- Gtk_New --
@@ -171,6 +191,170 @@ package body EarthStation.Main_Window is
       return True;
    end Handle_Timeout;
 
+   -----------------------
+   -- Handle_Import_TLE --
+   -----------------------
+
+   procedure Handle_Import_TLE
+     (Object		: access Gtk_Menu_Item_Record'Class;
+      User_Data		: in     Main_Window)
+   is
+      pragma Unreferenced (Object);
+      pragma Unreferenced (User_Data);
+      Cancel_Button	: Gtk_Button;
+      OK_Button		: Gtk_Button;
+      Open_Dialogue	: Gtk_File_Selection;
+   begin
+      Gtk_New (Open_Dialogue, "Import TLE File");
+      Hide_Fileop_Buttons (Open_Dialogue);
+      Cancel_Button := Get_Cancel_Button (Open_Dialogue);
+      OK_Button := Get_OK_Button (Open_Dialogue);
+
+      File_Callback.Object_Connect
+        (OK_Button,
+         "clicked",
+         File_Callback.To_Marshaller (Handle_Import_TLE_OK'Access),
+         Slot_Object => Open_Dialogue);
+
+      File_Callback.Object_Connect
+        (Cancel_Button,
+         "clicked",
+         File_Callback.To_Marshaller (Handle_Import_TLE_Cancel'Access),
+         Slot_Object => Open_Dialogue);
+
+      Show (Open_Dialogue);
+   end Handle_Import_TLE;
+
+   ------------------------------
+   -- Handle_Import_TLE_Cancel --
+   ------------------------------
+
+   procedure Handle_Import_TLE_Cancel
+     (Object : access Gtk_File_Selection_Record'Class)
+   is
+   begin
+      Destroy (Object);
+   end Handle_Import_TLE_Cancel;
+
+   --------------------------
+   -- Handle_Import_TLE_OK --
+   --------------------------
+
+   procedure Handle_Import_TLE_OK
+     (Object : access Gtk_File_Selection_Record'Class)
+   is
+      File	: aliased File_Type;
+      Filename	: constant String := Get_Filename (Object);
+      L1	: Unbounded_String;
+      L2	: Unbounded_String;
+      L3	: Unbounded_String;
+      Num_Imp	: Natural := 0;
+   begin
+
+      Open (File, In_File, Filename);
+
+      --  Find the start of the TLE data; some sources add a header which
+      --  needs to be ignored.
+
+      Set_Unbounded_String (L1, Get_String (File'Access));
+      Set_Unbounded_String (L2, Get_String (File'Access));
+      Set_Unbounded_String (L3, Get_String (File'Access));
+
+      if not Looks_Like_TLE (L1, L2, L3) then
+         loop
+            L1 := L2;
+            L2 := L3;
+            Set_Unbounded_String (L3, Get_String (File'Access));
+            exit when Looks_Like_TLE (L1, L2, L3);
+         end loop;
+      end if;
+
+      --  L1/L2/L3 should now contain a valid TLE set
+
+      loop
+         declare
+            K	: EarthStation.Predict.Keplerian_Elements;
+         begin
+            K := TLE_To_Keplerian_Elements (To_String (L2), To_String (L3));
+            Save (To_String (L1), K);
+            Num_Imp := Num_Imp + 1;
+         exception
+            when others =>
+               declare
+                  Msg_Dlg	: Gtk_Message_Dialog;
+                  R		: Gtk_Response_Type;
+               begin 
+                  Gtk_New
+                    (Msg_Dlg,
+                     Parent 	=> Gtk_Window (Object),
+                     Typ	=> Message_Warning,
+                     Message 	=> "Unable to import TLE for: " & To_String (L1));
+                  R := Run (Msg_Dlg);
+                  pragma Unreferenced (R);
+                  Destroy (Msg_Dlg);
+               end;         
+         end;
+
+         exit when End_Of_File (File);
+
+         Set_Unbounded_String (L1, Get_String (File'Access));
+         exit when L1 = "/EX";	--  AMSAT keps have this at EOF
+         Set_Unbounded_String (L2, Get_String (File'Access));
+         Set_Unbounded_String (L3, Get_String (File'Access));
+      end loop;
+
+      Close (File);
+
+      declare
+         Msg_Dlg	: Gtk_Message_Dialog;
+         R		: Gtk_Response_Type;
+      begin 
+         Gtk_New
+           (Msg_Dlg,
+            Parent 	=> Gtk_Window (Object),
+            Typ		=> Message_Info,
+            Message 	=> "Imported" & Natural'Image (Num_Imp) & " Elements");
+         R := Run (Msg_Dlg);
+         pragma Unreferenced (R);
+         Destroy (Msg_Dlg);
+      end;
+
+      Destroy (Object);
+   exception
+      when Ada.IO_Exceptions.END_ERROR =>
+         declare
+            Msg_Dlg	: Gtk_Message_Dialog;
+            R		: Gtk_Response_Type;
+         begin 
+            Gtk_New
+              (Msg_Dlg,
+               Parent 	=> Gtk_Window (Object),
+               Typ	=> Message_Warning,
+               Message 	=> "Unexpected EOF reading: " & Filename & ASCII.LF &
+                           "Imported" & Natural'Image (Num_Imp) & " Elements");
+            R := Run (Msg_Dlg);
+            pragma Unreferenced (R);
+            Destroy (Msg_Dlg);
+            Destroy (Object);
+            Close (File);
+         end;
+      when Ada.IO_Exceptions.NAME_ERROR =>
+         declare
+            Msg_Dlg	: Gtk_Message_Dialog;
+            R		: Gtk_Response_Type;
+         begin 
+            Gtk_New
+              (Msg_Dlg,
+               Parent 	=> Gtk_Window (Object),
+               Typ	=> Message_Warning,
+               Message 	=> "Unable open file: " & Filename);
+            R := Run (Msg_Dlg);
+            pragma Unreferenced (R);
+            Destroy (Msg_Dlg);
+            Destroy (Object);
+         end;
+   end Handle_Import_TLE_OK;
+
    ------------------------------
    -- Handle_Track_Menu_Select --
    ------------------------------
@@ -208,10 +392,19 @@ package body EarthStation.Main_Window is
       --  Setup main menu
       --  File Menu
       Gtk_New (This.File_Menu);
+      Gtk_New_With_Mnemonic (Menu_Item, "Import _TLE File...");
+      Menu_Item_Window_Callback.Connect
+        (Menu_Item,
+         "activate",
+         Menu_Item_Window_Callback.Marshallers.Void_Marshaller.To_Marshaller
+           (Handle_Import_TLE'Access), User_Data => Main_Window (This));
+      Append (This.File_Menu, Menu_Item);
+
       Gtk_New_With_Mnemonic (Menu_Item, "E_xit");
       Menu_Item_Callback.Connect
         (Menu_Item, "activate", Menu_Item_Callback.To_Marshaller (Exit_Main'Access));
       Append (This.File_Menu, Menu_Item);
+
       Gtk_New_With_Mnemonic (Menu_Item, "_File");
       Append (This.Menu_Bar, Menu_Item);
       Set_Submenu (Menu_Item, This.File_Menu);
@@ -297,6 +490,25 @@ package body EarthStation.Main_Window is
       Timeout := Main_Window_Timeout.Timeout_Add
         (500, Handle_Timeout'Access, Main_Window (This));
    end Initialize;
+
+   --------------------
+   -- Looks_Like_TLE --
+   --------------------
+
+   function Looks_Like_TLE
+     (Name		: in Unbounded_String;
+      Line_1		: in Unbounded_String;
+      Line_2		: in Unbounded_String) return Boolean
+   is
+   begin
+      if Length (Name) > 0 and then Length (Name) < 33 and then
+        Length (Line_1) = 69 and then Length (Line_2) = 69 and then
+        Element (Line_1, 1) = '1' and then Element (Line_2, 1) = '2' then 
+         return True;
+      else
+         return False;
+      end if;
+   end Looks_Like_TLE;
 
    --------------------
    -- Show_About_Box --
