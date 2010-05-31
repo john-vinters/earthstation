@@ -29,6 +29,7 @@ with EarthStation.Platform;		use EarthStation.Platform;
 with EarthStation.Predict;		use EarthStation.Predict;
 with Glib;				use Glib;
 with Glib.Main;				use Glib.Main;
+with GNAT.OS_Lib;			use GNAT.OS_Lib;
 with Gtk;				use Gtk;
 with Gtk.Button;			use Gtk.Button;
 with Gtk.Dialog;			use Gtk.Dialog;
@@ -36,6 +37,7 @@ with Gtk.Enums;				use Gtk.Enums;
 with Gtk.Handlers;			use Gtk.Handlers;
 with Gtk.Message_Dialog;		use Gtk.Message_Dialog;
 with Gtk.Main;				use Gtk.Main;
+with Gtkada.Dialogs;			use Gtkada.Dialogs;
 
 package body EarthStation.Main_Window is
 
@@ -90,6 +92,49 @@ package body EarthStation.Main_Window is
       This := new Main_Window_Record;
       Initialize (This);
    end Gtk_New;
+
+   -------------------------------------
+   -- Handle_Clear_Keplerian_Elements --
+   -------------------------------------
+
+   procedure Handle_Clear_Keplerian_Elements
+     (Object		: access Gtk_Menu_Item_Record'Class;
+      User_Data		: in     Main_Window)
+   is
+      pragma Unreferenced (Object);
+      pragma Unreferenced (User_Data);
+      Result		: Message_Dialog_Buttons;
+   begin
+      Result := Gtkada.Dialogs.Message_Dialog
+        (Msg		=> "Are you sure you wish to clear Keplerian Elements?" & 
+                    	   ASCII.LF &
+                   	   "After doing this you will need to import a TLE File.",
+         Dialog_Type	=> Confirmation,
+         Buttons	=> Button_Yes or Button_No,
+         Default_Button	=> Button_No);
+
+      if Result = Button_Yes then
+         Iterate_Satellite_Names (Handle_Clear_Keplerian_Iter'Access);
+         --  FIXME: need to stop displaying all satellites
+      end if;
+   end Handle_Clear_Keplerian_Elements;
+
+   ---------------------------------
+   -- Handle_Clear_Keplerian_Iter --
+   ---------------------------------
+
+   function Handle_Clear_Keplerian_Iter
+     (Satellite_Name	: in String) return Boolean
+   is
+      Filename		: constant String :=
+        EarthStation.Platform.Get_Keplerian_Elements_Directory &
+        To_Filename (Satellite_Name);
+      Junk		: Boolean;
+   begin
+      Delete_File (Filename, Junk);
+      pragma Unreferenced (Junk);
+      return True;
+   end Handle_Clear_Keplerian_Iter;
 
    --------------------------------------
    -- Handle_Groundstation_Menu_Select --
@@ -398,6 +443,14 @@ package body EarthStation.Main_Window is
          "activate",
          Menu_Item_Window_Callback.Marshallers.Void_Marshaller.To_Marshaller
            (Handle_Import_TLE'Access), User_Data => Main_Window (This));
+      Append (This.File_Menu, Menu_Item);
+
+      Gtk_New_With_Mnemonic (Menu_Item, "Clear Keplerian Elements");
+      Menu_Item_Window_Callback.Connect
+        (Menu_Item,
+         "activate",
+         Menu_Item_Window_Callback.Marshallers.Void_Marshaller.To_Marshaller
+           (Handle_Clear_Keplerian_Elements'Access), User_Data => Main_Window (This));
       Append (This.File_Menu, Menu_Item);
 
       Gtk_New_With_Mnemonic (Menu_Item, "E_xit");

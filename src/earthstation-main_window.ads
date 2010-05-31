@@ -64,6 +64,15 @@ private
    procedure Exit_Main (Object : access Gtk_Widget_Record'Class);
    --  "destroy" event handler for when main window is closed by user
 
+   procedure Handle_Clear_Keplerian_Elements
+     (Object		: access Gtk_Menu_Item_Record'Class;
+      User_Data		: in     Main_Window);
+   --  Clears Keplerian Elements directory.
+
+   function Handle_Clear_Keplerian_Iter
+     (Satellite_Name	: in String) return Boolean;
+   --  Iterator used to delete Satellite Keplerian Elements.
+
    procedure Handle_Groundstation_Menu_Select
      (Object		: access Gtk_Menu_Item_Record'Class;
       User_Data		: in     Main_Window);
