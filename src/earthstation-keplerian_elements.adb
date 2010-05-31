@@ -168,7 +168,7 @@ package body EarthStation.Keplerian_Elements is
       Start_Search
         (Search		=> St,
          Directory	=> EarthStation.Platform.Get_Keplerian_Elements_Directory,
-         Pattern	=> "*.tle");
+         Pattern	=> "*");
 
       loop
          exit when not More_Entries (St);
@@ -360,23 +360,24 @@ package body EarthStation.Keplerian_Elements is
 
    function To_Filename (Input : in String) return String is
       Temp	: Unbounded_String;
+      Trim_Inp	: constant String := Trim_Nonprint (Input);
    begin
       if Input'Length = 0 then
          raise CONSTRAINT_ERROR;
       end if;
 
-      for i in Input'Range loop
-         case Input (i) is
+      for i in Trim_Inp'Range loop
+         case Trim_Inp (i) is
             when 'a'..'z' =>
-               Append (Temp, Input (i));
+               Append (Temp, Trim_Inp (i));
             when 'A'..'Z' =>
-               Append (Temp, Input (i));
+               Append (Temp, Trim_Inp (i));
             when '0'..'9' =>
-               Append (Temp, Input (i));
+               Append (Temp, Trim_Inp (i));
             when '%' =>
                Append (Temp, "%%");
             when others =>
-               Append (Temp, To_Hex (Input (i)));
+               Append (Temp, To_Hex (Trim_Inp (i)));
          end case;
       end loop;
 
@@ -396,6 +397,39 @@ package body EarthStation.Keplerian_Elements is
         Hex_Digits (Hex_Digits'First + C2) &
         Hex_Digits (Hex_Digits'First + C1);
    end To_Hex;
+
+   -------------------
+   -- Trim_Nonprint --
+   -------------------
+
+   function Trim_Nonprint (This : in String) return String is
+      Left	: Natural := This'Last;
+      Right	: Natural := This'First;
+   begin
+      --  First, find the first printable character on the left
+
+      for i in This'Range loop
+         if Character'Pos (This (i)) > 32 and then
+           Character'Pos (This (i)) <= 126 then
+            Left := i;
+            exit;
+         end if;
+      end loop;
+
+      if Left = This'Last then
+         return "";
+      end if;
+
+      for i in reverse This'Range loop
+         if Character'Pos (This (i)) > 32 and then
+           Character'Pos (This (i)) <= 126 then
+            Right := i;
+            exit;
+         end if;
+      end loop;
+
+      return This (Left .. Right);
+   end Trim_Nonprint;
 
 end EarthStation.Keplerian_Elements;
 

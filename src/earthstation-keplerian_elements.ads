@@ -61,6 +61,9 @@ package EarthStation.Keplerian_Elements is
    function To_Filename (Input : in String) return String;
    --  Converts satellite name to filename
 
+   function Trim_Nonprint (This : in String) return String;
+   --  Trims non-printing characters from beginning and end of string
+
 private
 
    function Get_Integer (File : access File_Type) return Integer;
