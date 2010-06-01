@@ -37,7 +37,6 @@ with Gtk.Button;			use Gtk.Button;
 with Gtk.Dialog;			use Gtk.Dialog;
 with Gtk.Enums;				use Gtk.Enums;
 with Gtk.Handlers;			use Gtk.Handlers;
-with Gtk.Message_Dialog;		use Gtk.Message_Dialog;
 with Gtk.Main;				use Gtk.Main;
 with Gtkada.Dialogs;			use Gtkada.Dialogs;
 
@@ -282,6 +281,8 @@ package body EarthStation.Main_Window is
       L2	: Unbounded_String;
       L3	: Unbounded_String;
       Num_Imp	: Natural := 0;
+      Result	: Message_Dialog_Buttons;
+      pragma Unreferenced (Result);
    begin
 
       Open (File, In_File, Filename);
@@ -306,26 +307,19 @@ package body EarthStation.Main_Window is
 
       loop
          declare
-            K	: EarthStation.Predict.Keplerian_Elements;
+            K		: EarthStation.Predict.Keplerian_Elements;
          begin
             K := TLE_To_Keplerian_Elements (To_String (L2), To_String (L3));
             Save (To_String (L1), K);
             Num_Imp := Num_Imp + 1;
          exception
             when others =>
-               declare
-                  Msg_Dlg	: Gtk_Message_Dialog;
-                  R		: Gtk_Response_Type;
-               begin 
-                  Gtk_New
-                    (Msg_Dlg,
-                     Parent 	=> Gtk_Window (Object),
-                     Typ	=> Message_Warning,
-                     Message 	=> "Unable to import TLE for: " & To_String (L1));
-                  R := Run (Msg_Dlg);
-                  pragma Unreferenced (R);
-                  Destroy (Msg_Dlg);
-               end;         
+               Result := Gtkada.Dialogs.Message_Dialog
+                 (Msg			=> "Unable to import TLE for: " 
+                                             & To_String (L1),
+                  Dialog_Type		=> Warning,
+                  Buttons		=> Button_OK,
+                  Default_Button	=> Button_OK);
          end;
 
          exit when End_Of_File (File);
@@ -338,54 +332,34 @@ package body EarthStation.Main_Window is
 
       Close (File);
 
-      declare
-         Msg_Dlg	: Gtk_Message_Dialog;
-         R		: Gtk_Response_Type;
-      begin 
-         Gtk_New
-           (Msg_Dlg,
-            Parent 	=> Gtk_Window (Object),
-            Typ		=> Message_Info,
-            Message 	=> "Imported" & Natural'Image (Num_Imp) & " Elements");
-         R := Run (Msg_Dlg);
-         pragma Unreferenced (R);
-         Destroy (Msg_Dlg);
-      end;
+      Result := Gtkada.Dialogs.Message_Dialog
+        (Msg			=> "Imported"  & Natural'Image (Num_Imp)
+                                     & " Elements",
+         Dialog_Type		=> Information,
+         Buttons		=> Button_OK,
+         Default_Button		=> Button_OK);
 
       Destroy (Object);
    exception
       when Ada.IO_Exceptions.END_ERROR =>
-         declare
-            Msg_Dlg	: Gtk_Message_Dialog;
-            R		: Gtk_Response_Type;
-         begin 
-            Gtk_New
-              (Msg_Dlg,
-               Parent 	=> Gtk_Window (Object),
-               Typ	=> Message_Warning,
-               Message 	=> "Unexpected EOF reading: " & Filename & ASCII.LF &
-                           "Imported" & Natural'Image (Num_Imp) & " Elements");
-            R := Run (Msg_Dlg);
-            pragma Unreferenced (R);
-            Destroy (Msg_Dlg);
+         Result := Gtkada.Dialogs.Message_Dialog
+           (Msg			=> "Unexpected EOF reading: " & Filename
+                                     & ASCII.LF
+                                     & " Imported" & Natural'Image (Num_Imp)
+                                     & " Elements",
+            Dialog_Type		=> Warning,
+            Buttons		=> Button_OK,
+            Default_Button	=> Button_OK);
+
             Destroy (Object);
             Close (File);
-         end;
       when Ada.IO_Exceptions.NAME_ERROR =>
-         declare
-            Msg_Dlg	: Gtk_Message_Dialog;
-            R		: Gtk_Response_Type;
-         begin 
-            Gtk_New
-              (Msg_Dlg,
-               Parent 	=> Gtk_Window (Object),
-               Typ	=> Message_Warning,
-               Message 	=> "Unable open file: " & Filename);
-            R := Run (Msg_Dlg);
-            pragma Unreferenced (R);
-            Destroy (Msg_Dlg);
+         Result := Gtkada.Dialogs.Message_Dialog
+           (Msg			=> "Unable to Open File: " & Filename,
+            Dialog_Type		=> Error,
+            Buttons		=> Button_OK,
+            Default_Button	=> Button_OK);
             Destroy (Object);
-         end;
    end Handle_Import_TLE_OK;
 
    ------------------------------
