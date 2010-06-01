@@ -59,7 +59,7 @@ package body EarthStation.Preferences is
 
    function Get_Groundstation_Name (This : in Pref_Data) return String is
    begin
-      return Trim (This.Groundstation_Name, Both);
+      return To_String (This.Groundstation_Name);
    end Get_Groundstation_Name;
 
    --------------------
@@ -71,6 +71,15 @@ package body EarthStation.Preferences is
    begin
       return Long_Float'Value (Float_Str);
    end Get_Long_Float;
+
+   ----------------------------
+   -- Get_Selected_Satellite --
+   ----------------------------
+
+   function Get_Selected_Satellite (This : in Pref_Data) return String is
+   begin
+      return To_String (This.Selected_Satellite);
+   end Get_Selected_Satellite;
 
    ----------------
    -- Get_String --
@@ -84,7 +93,7 @@ package body EarthStation.Preferences is
       Temp_String		: String (1 .. Max_Length);
    begin
       Get_Line (File.all, Temp_String, Line_Length);
-      return Temp_String (1 .. Line_Length);
+      return Trim (Temp_String (1 .. Line_Length), Both);
    end Get_String;
 
    ----------------
@@ -97,6 +106,7 @@ package body EarthStation.Preferences is
       Set_Groundstation_Latitude (This, 53.73);
       Set_Groundstation_Longitude (This, -1.86);
       Set_Groundstation_Name (This, "Halifax");
+      Set_Selected_Satellite (This, "");
       Create_Home_Directory;
       Create_Preferences_Directory;
       Load_Preferences (This);
@@ -124,6 +134,7 @@ package body EarthStation.Preferences is
       Set_Groundstation_Latitude (This, Get_Long_Float (File'Access));
       Set_Groundstation_Longitude (This, Get_Long_Float (File'Access));
       Set_Groundstation_Height (This, Get_Long_Float (File'Access));
+      Set_Selected_Satellite (This, Get_String (File'Access, 256));
 
       Close (File);
    exception
@@ -178,6 +189,7 @@ package body EarthStation.Preferences is
       Put_Long_Float (File, This.Groundstation_Latitude);
       Put_Long_Float (File, This.Groundstation_Longitude);
       Put_Long_Float (File, This.Groundstation_Height);
+      Put_String (File, Get_Selected_Satellite (This));
 
       Close (File);
    exception
@@ -235,11 +247,22 @@ package body EarthStation.Preferences is
    begin
       if Groundstation_Name'Length > NAME_LEN_MAX then
          raise PREF_EXCEPTION;
+      else
+         Set_Unbounded_String (This.Groundstation_Name, Groundstation_Name);
       end if;
-
-      This.Groundstation_Name := (others => ' ');
-      This.Groundstation_Name (1 .. Groundstation_Name'Length) := Groundstation_Name;
    end Set_Groundstation_Name;
+
+   ----------------------------
+   -- Set_Selected_Satellite --
+   ----------------------------
+
+   procedure Set_Selected_Satellite
+     (This			: in out Pref_Data;
+      Satellite_Name		: in     String)
+   is
+   begin
+      Set_Unbounded_String (This.Selected_Satellite, Satellite_Name);
+   end Set_Selected_Satellite;
 
 end EarthStation.Preferences;
 

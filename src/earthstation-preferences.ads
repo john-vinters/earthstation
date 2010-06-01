@@ -19,6 +19,7 @@
 
 pragma License (GPL);
 
+with Ada.Strings.Unbounded;		use Ada.Strings.Unbounded;
 with Ada.Text_IO;			use Ada.Text_IO;
 
 package EarthStation.Preferences is
@@ -40,6 +41,9 @@ package EarthStation.Preferences is
 
    function Get_Groundstation_Name (This : in Pref_Data) return String;
    --  Returns the currently set Groundstation Name.
+
+   function Get_Selected_Satellite (This : in Pref_Data) return String;
+   --  Returns the name of the currently selected Satellite.
 
    procedure Initialize (This : in out Pref_Data);
    --  Tries to load preferences from file.  If the file doesn't exist, then
@@ -74,13 +78,19 @@ package EarthStation.Preferences is
    --  Sets the Groundstation Name.  PREF_EXCEPTION is raised if the name
    --  is longer than NAME_LEN_MAX characters.
 
+   procedure Set_Selected_Satellite
+     (This			: in out Pref_Data;
+      Satellite_Name		: in     String);
+   --  Sets the currently selected satellite name.
+
 private
 
    type Pref_Data is record
       Groundstation_Height	: Long_Float;
       Groundstation_Latitude	: Long_Float;
       Groundstation_Longitude	: Long_Float;
-      Groundstation_Name	: String (1 .. NAME_LEN_MAX);
+      Groundstation_Name	: Unbounded_String;
+      Selected_Satellite	: Unbounded_String;
    end record;
 
    function Get_Long_Float (File : access File_Type) return Long_Float;
