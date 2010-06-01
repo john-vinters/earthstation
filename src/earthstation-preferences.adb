@@ -176,7 +176,7 @@ package body EarthStation.Preferences is
    -- Save_Preferences --
    ----------------------
 
-   procedure Save_Preferences (This : in out Pref_Data) is
+   procedure Save_Preferences (This : in     Pref_Data) is
       Closed		: Boolean := True;
       File		: aliased File_Type;
       Prefs_Name	: constant String :=

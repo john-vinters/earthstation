@@ -53,7 +53,7 @@ package EarthStation.Preferences is
    --  Loads preference data.  Raises PREF_EXCEPTION if there was an error
    --  reading the preferences file (or if it doesn't exist)
 
-   procedure Save_Preferences (This : in out Pref_Data);
+   procedure Save_Preferences (This : in     Pref_Data);
    --  Saves preference data.  Raises PREF_EXCEPTION if we couldn't successfully
    --  save the preferences file.
 
