@@ -27,6 +27,8 @@ with EarthStation.Groundstation_Dialogue;
 with EarthStation.Keplerian_Elements;	use EarthStation.Keplerian_Elements;
 with EarthStation.Platform;		use EarthStation.Platform;
 with EarthStation.Predict;		use EarthStation.Predict;
+with EarthStation.Preferences;		use EarthStation.Preferences;
+with EarthStation.Select_Satellite;	use EarthStation.Select_Satellite;
 with Glib;				use Glib;
 with Glib.Main;				use Glib.Main;
 with GNAT.OS_Lib;			use GNAT.OS_Lib;
@@ -48,6 +50,7 @@ package body EarthStation.Main_Window is
      (Gtk_Menu_Item_Record, Main_Window);
    package Window_Callback is new Handlers.Callback (Gtk_Widget_Record);
 
+   Prefs			: EarthStation.Preferences.Pref_Data;
    Shutting_Down		: Boolean := False;
 
    ---------------
@@ -150,25 +153,25 @@ package body EarthStation.Main_Window is
    begin
       Gtk_New (GS_Dialogue);
       ESGD.Set_GS_Name
-        (GS_Dialogue, Get_Groundstation_Name (User_Data.Preferences));
+        (GS_Dialogue, Get_Groundstation_Name (Prefs));
       ESGD.Set_Latitude
-        (GS_Dialogue, Get_Groundstation_Latitude (User_Data.Preferences));
+        (GS_Dialogue, Get_Groundstation_Latitude (Prefs));
       ESGD.Set_Longitude
-        (GS_Dialogue, Get_Groundstation_Longitude (User_Data.Preferences));
+        (GS_Dialogue, Get_Groundstation_Longitude (Prefs));
       ESGD.Set_Height
-        (GS_Dialogue, Get_Groundstation_Height (User_Data.Preferences));
+        (GS_Dialogue, Get_Groundstation_Height (Prefs));
 
       loop
          begin
             if Run (GS_Dialogue) = Gtk_Response_OK then
                Set_Groundstation_Name
-                 (User_Data.Preferences, ESGD.Get_GS_Name (GS_Dialogue));
+                 (Prefs, ESGD.Get_GS_Name (GS_Dialogue));
                Set_Groundstation_Latitude
-                 (User_Data.Preferences, ESGD.Get_Latitude (GS_Dialogue));
+                 (Prefs, ESGD.Get_Latitude (GS_Dialogue));
                Set_Groundstation_Longitude
-                 (User_Data.Preferences, ESGD.Get_Longitude (GS_Dialogue));
+                 (Prefs, ESGD.Get_Longitude (GS_Dialogue));
                Set_Groundstation_Height
-                 (User_Data.Preferences, ESGD.Get_Height (GS_Dialogue));
+                 (Prefs, ESGD.Get_Height (GS_Dialogue));
                exit;
             else
                exit;
@@ -193,13 +196,13 @@ package body EarthStation.Main_Window is
 
       EarthStation.Tracking.Initialize
         (This			=> User_Data.Data,
-         Groundstation_Name	=> Get_Groundstation_Name (User_Data.Preferences),
-         Latitude		=> Get_Groundstation_Latitude (User_Data.Preferences),
-         Longitude		=> Get_Groundstation_Longitude (User_Data.Preferences),
-         Height			=> Get_Groundstation_Height (User_Data.Preferences));
+         Groundstation_Name	=> Get_Groundstation_Name (Prefs),
+         Latitude		=> Get_Groundstation_Latitude (Prefs),
+         Longitude		=> Get_Groundstation_Longitude (Prefs),
+         Height			=> Get_Groundstation_Height (Prefs));
 
       begin
-         Save_Preferences (User_Data.Preferences);
+         Save_Preferences (Prefs);
       exception
          when others =>
             declare
@@ -410,7 +413,28 @@ package body EarthStation.Main_Window is
    is
    begin
       EarthStation.Tracking.Select_Satellite (User_Data.all, Object);
+      Set_Selected_Satellite (Prefs, Get_Selected_Satellite (User_Data.all));
+      Save_Preferences (Prefs);
    end Handle_Track_Menu_Select;
+
+   ----------------------------
+   -- Handle_Tracking_Select --
+   ----------------------------
+
+   procedure Handle_Tracking_Select
+     (Object		: access Gtk_Menu_Item_Record'Class;
+      User_Data		: in     Main_Window)
+   is
+      pragma Unreferenced (Object);
+      pragma Unreferenced (User_Data);
+      Track_Dialogue	: EarthStation.Select_Satellite.Select_Satellite;
+   begin
+      Gtk_New (Track_Dialogue);
+      if Run (Track_Dialogue) = Gtk_Response_OK then
+         put_line ("OK");
+      end if;
+      Destroy (Track_Dialogue);
+   end Handle_Tracking_Select;
 
    ----------------
    -- Initialize --
@@ -464,12 +488,21 @@ package body EarthStation.Main_Window is
 
       --  Edit Menu
       Gtk_New (This.Edit_Menu);
+
       Gtk_New_With_Mnemonic (Menu_Item, "_Groundstation...");
       Menu_Item_Window_Callback.Connect
         (Menu_Item, 
          "activate", 
          Menu_Item_Window_Callback.Marshallers.Void_Marshaller.To_Marshaller
           (Handle_Groundstation_Menu_Select'Access), User_Data => Main_Window (This));
+      Append (This.Edit_Menu, Menu_Item);
+
+      Gtk_New_With_Mnemonic (Menu_Item, "_Tracking...");
+      Menu_Item_Window_Callback.Connect
+        (Menu_Item, 
+         "activate", 
+         Menu_Item_Window_Callback.Marshallers.Void_Marshaller.To_Marshaller
+          (Handle_Tracking_Select'Access), User_Data => Main_Window (This));
       Append (This.Edit_Menu, Menu_Item);
 
       Gtk_New_With_Mnemonic (Menu_Item, "_Edit");
@@ -507,7 +540,7 @@ package body EarthStation.Main_Window is
       Add (This, This.VBox);
 
       begin
-         EarthStation.Preferences.Initialize (This.Preferences);
+         EarthStation.Preferences.Initialize (Prefs);
       exception
          when others =>
             declare
@@ -527,10 +560,10 @@ package body EarthStation.Main_Window is
 
       EarthStation.Tracking.Initialize
         (This			=> This.Data,
-         Groundstation_Name	=> Get_Groundstation_Name (This.Preferences),
-         Latitude		=> Get_Groundstation_Latitude (This.Preferences),
-         Longitude		=> Get_Groundstation_Longitude (This.Preferences),
-         Height			=> Get_Groundstation_Height (This.Preferences));
+         Groundstation_Name	=> Get_Groundstation_Name (Prefs),
+         Latitude		=> Get_Groundstation_Latitude (Prefs),
+         Longitude		=> Get_Groundstation_Longitude (Prefs),
+         Height			=> Get_Groundstation_Height (Prefs));
 
       Create_Keplerian_Elements_Directory;
 

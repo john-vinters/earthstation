@@ -22,7 +22,6 @@ pragma License (GPL);
 with Ada.Strings.Unbounded;		use Ada.Strings.Unbounded;
 with EarthStation.Data_Table;		use EarthStation.Data_Table;
 with EarthStation.Map_Display;		use EarthStation.Map_Display;
-with EarthStation.Preferences;		use EarthStation.Preferences;
 with EarthStation.Tracking;		use EarthStation.Tracking;
 with Gtk.Box;				use Gtk.Box;
 with Gtk.File_Selection;		use Gtk.File_Selection;
@@ -53,7 +52,6 @@ private
       Help_Menu		: Gtk_Menu;
       Map		: Map_Display.Map_Display;
       Menu_Bar		: Gtk_Menu_Bar;
-      Preferences	: EarthStation.Preferences.Pref_Data;
       Satellite_Data	: Data_Table.Data_Table;
       Status_Bar	: Gtk_Status_Bar;
       VBox		: Gtk_Box;
@@ -100,6 +98,11 @@ private
      (Object		: access Gtk_Menu_Item_Record'Class;
       User_Data		: in     EarthStation.Tracking.Data_Access);
    --  Handles Active Track Menu selections
+
+   procedure Handle_Tracking_Select
+     (Object		: access Gtk_Menu_Item_Record'Class;
+      User_Data		: in     Main_Window);
+   --  Handles Tracking Select Dialogue.
 
    function Looks_Like_TLE
      (Name		: in Unbounded_String;
