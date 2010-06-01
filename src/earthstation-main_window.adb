@@ -105,7 +105,6 @@ package body EarthStation.Main_Window is
       User_Data		: in     Main_Window)
    is
       pragma Unreferenced (Object);
-      pragma Unreferenced (User_Data);
       Result		: Message_Dialog_Buttons;
    begin
       Result := Gtkada.Dialogs.Message_Dialog
@@ -118,7 +117,7 @@ package body EarthStation.Main_Window is
 
       if Result = Button_Yes then
          Iterate_Satellite_Names (Handle_Clear_Keplerian_Iter'Access);
-         --  FIXME: need to stop displaying all satellites
+         EarthStation.Tracking.Clear (User_Data.all.Data);
       end if;
    end Handle_Clear_Keplerian_Elements;
 
@@ -150,6 +149,8 @@ package body EarthStation.Main_Window is
       pragma Unreferenced (Object);
       package ESGD renames EarthStation.Groundstation_Dialogue;
       GS_Dialogue	: ESGD.Groundstation_Dialogue;
+      Result		: Message_Dialog_Buttons;
+      pragma Unreferenced (Result);
    begin
       Gtk_New (GS_Dialogue);
       ESGD.Set_GS_Name
@@ -178,19 +179,11 @@ package body EarthStation.Main_Window is
             end if;
          exception
             when CONSTRAINT_ERROR =>
-               declare
-                  Msg_Dlg	: Gtk_Message_Dialog;
-                  R		: Gtk_Response_Type;
-               begin
-                  Gtk_New
-                   (Msg_Dlg, 
-                    Parent	=> Gtk_Window (User_Data),
-                    Typ		=> Message_Error,
-                    Message	=> "Invalid value");
-                  R := Run (Msg_Dlg);
-                  pragma Unreferenced (R);
-                  Destroy (Msg_Dlg);
-               end;
+               Result := Gtkada.Dialogs.Message_Dialog
+                 (Msg			=> "Invalid Value",
+                  Dialog_Type		=> Error,
+                  Buttons		=> Button_OK,
+                  Default_Button	=> Button_OK);
          end;
       end loop;
 
@@ -205,19 +198,11 @@ package body EarthStation.Main_Window is
          Save_Preferences (Prefs);
       exception
          when others =>
-            declare
-               Msg_Dlg		: Gtk_Message_Dialog;
-               R		: Gtk_Response_Type;
-            begin
-               Gtk_New
-                 (Msg_Dlg,
-                  Parent	=> Gtk_Window (User_Data),
-                  Typ		=> Message_Warning,
-                  Message	=> "Unable to save preferences");
-               R := Run (Msg_Dlg);
-               pragma Unreferenced (R);
-               Destroy (Msg_Dlg);
-            end;
+            Result := Gtkada.Dialogs.Message_Dialog
+              (Msg		=> "Can't save Preferences",
+               Dialog_Type	=> Warning,
+               Buttons		=> Button_OK,
+               Default_Button	=> Button_OK);
       end;
 
       Destroy (GS_Dialogue);
@@ -411,10 +396,19 @@ package body EarthStation.Main_Window is
      (Object		: access Gtk_Menu_Item_Record'Class;
       User_Data		: in     EarthStation.Tracking.Data_Access)
    is
+      Result		: Message_Dialog_Buttons;
+      pragma Unreferenced (Result);
    begin
       EarthStation.Tracking.Select_Satellite (User_Data.all, Object);
       Set_Selected_Satellite (Prefs, Get_Selected_Satellite (User_Data.all));
       Save_Preferences (Prefs);
+   exception
+      when PREF_EXCEPTION =>
+         Result := Gtkada.Dialogs.Message_Dialog
+           (Msg			=> "Can't save Preferences",
+            Dialog_Type		=> Error,
+            Buttons		=> Button_OK,
+            Default_Button	=> Button_OK);
    end Handle_Track_Menu_Select;
 
    ----------------------------
@@ -542,19 +536,16 @@ package body EarthStation.Main_Window is
       begin
          EarthStation.Preferences.Initialize (Prefs);
       exception
-         when others =>
+         when PREF_EXCEPTION =>
             declare
-               Msg_Dlg	: Gtk_Message_Dialog;
-               R	: Gtk_Response_Type;
+               Result	: Message_Dialog_Buttons;
+               pragma Unreferenced (Result);
             begin 
-               Gtk_New
-                 (Msg_Dlg,
-                  Parent 	=> Gtk_Window (This),
-                  Typ		=> Message_Warning,
-                  Message 	=> "Unable to load preferences - using defaults.");
-               R := Run (Msg_Dlg);
-               pragma Unreferenced (R);
-               Destroy (Msg_Dlg);
+               Result := Gtkada.Dialogs.Message_Dialog
+                 (Msg			=> "Can't Load Preferences - using Defaults",
+                  Dialog_Type		=> Warning,
+                  Buttons		=> Button_OK,
+                  Default_Button	=> Button_OK);
             end;
       end;
 
