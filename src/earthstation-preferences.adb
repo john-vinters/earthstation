@@ -142,7 +142,7 @@ package body EarthStation.Preferences is
          if not Closed then 
             Close (File);
          end if;
-         raise;
+         raise PREF_EXCEPTION;
    end Load_Preferences;
 
    --------------------
@@ -197,7 +197,7 @@ package body EarthStation.Preferences is
          if not Closed then
             Close (File);
          end if;
-         raise;
+         raise PREF_EXCEPTION;
    end Save_Preferences;
 
    ------------------------------
