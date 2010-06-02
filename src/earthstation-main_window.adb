@@ -523,7 +523,7 @@ package body EarthStation.Main_Window is
       Update_Tracking_Menu (This);
 
       Timeout := Main_Window_Timeout.Timeout_Add
-        (500, Handle_Timeout'Access, Main_Window (This));
+        (350, Handle_Timeout'Access, Main_Window (This));
    end Initialize;
 
    --------------------

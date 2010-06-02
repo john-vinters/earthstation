@@ -403,13 +403,13 @@ package body EarthStation.Tracking is
          Index	: constant Natural := To_Index (Cursor);
       begin
          if Update_Sat then
+            if Now > Item.Next_Check then
+               Calculate_Next_AOS_LOS (This, Item);
+            end if;
             Item.Sat_Vectors := ESP.Calculate_Satellite_Vectors
               (Item.Satellite, Dn, Df);
             Item.Rng_Vectors := ESP.Calculate_Range_Vectors
               (This.Groundstation, Item.Sat_Vectors);
-            if Now > Item.Next_Check then
-               Calculate_Next_AOS_LOS (This, Item);
-            end if;
             Replace_Element (This.Satellites, Cursor, Item);
          end if;
 
