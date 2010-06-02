@@ -105,7 +105,7 @@ package body EarthStation.Map_Display is
    begin
       Gdk_New (GC, This.Screen_Image);
       Set_Foreground (GC, Colour);
-      Set_Line_Attributes (GC, 3, Line_Solid, Cap_Round, Join_Miter);
+      Set_Line_Attributes (GC, 2, Line_Solid, Cap_Round, Join_Miter);
       Cos_Radius := Cos (Radius);
       Sin_Radius := Sin (Radius);
 
