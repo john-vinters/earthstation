@@ -325,6 +325,8 @@ package body EarthStation.Keplerian_Elements is
                             Line_1 (Line_1'First + 18 .. Line_1'First + 19);
          Epoch_Time_Str	: constant String := 
                             Line_1 (Line_1'First + 20 .. Line_1'First + 31);
+         Decay_Str	: constant String := "0" &
+                            Line_1 (Line_1'First + 34 .. Line_1'First + 42);
          Inclin_Str	: constant String :=
                             Line_2 (Line_2'First + 8 .. Line_2'First + 15);
          RAAN_Str	: constant String :=
@@ -348,6 +350,7 @@ package body EarthStation.Keplerian_Elements is
          Temp.Argument_Perigee := Long_Float'Value (AP_Str);
          Temp.Mean_Anomaly := Long_Float'Value (MA_Str);
          Temp.Mean_Motion := Long_Float'Value (MM_Str);
+         Temp.Decay_Rate := Long_Float'Value (Decay_Str);
          Temp.Orbit_Number := Long_Integer'Value (Orbit_Str);
          Temp.ALON := 0.0;
          Temp.ALAT := 0.0;
