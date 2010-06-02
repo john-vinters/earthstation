@@ -117,6 +117,7 @@ package body EarthStation.Main_Window is
       if Result = Button_Yes then
          Iterate_Satellite_Names (Handle_Clear_Keplerian_Iter'Access);
          EarthStation.Tracking.Clear (User_Data.all.Data);
+         Update_Tracking_Menu (User_Data);
       end if;
    end Handle_Clear_Keplerian_Elements;
 
