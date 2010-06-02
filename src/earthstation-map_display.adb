@@ -95,7 +95,7 @@ package body EarthStation.Map_Display is
       Lon		: Long_Float;
       Nx, Ny		: Gint;
       Px, Py		: Gint := -9999;
-      Radius		: constant Long_Float := Arccos (Predict.RE / RS_Distance);
+      Radius		: Long_Float;
       Sin_Lat		: constant Long_Float := Sin (Radians (Latitude));
       Sin_Lon		: constant Long_Float := Sin (Radians (Longitude));
       Sin_Radius	: Long_Float;
@@ -103,6 +103,20 @@ package body EarthStation.Map_Display is
       X2, Y2, Z2	: Long_Float;
       W2		: constant Gint := This.Current_Width / 2;
    begin
+      begin
+         Radius := Arccos (Predict.RE / RS_Distance);
+      exception
+         when Ada.Numerics.ARGUMENT_ERROR =>
+            Gdk_New (GC, This.Screen_Image);
+            Nx := Longitude_To_X (This, Longitude);
+            Ny := Latitude_To_Y (This, Latitude);
+            Set_Foreground (GC, Red);
+            Draw_Text (This.Screen_Image, Id_Font, GC, Nx + 5, Ny - 5, Text => Id);
+            Draw_Rectangle (This.Screen_Image, GC, True, Nx - 1, Ny - 1, 3, 3);
+            Unref (GC);
+            return;
+      end;
+
       Gdk_New (GC, This.Screen_Image);
       Set_Foreground (GC, Colour);
       Set_Line_Attributes (GC, 2, Line_Solid, Cap_Round, Join_Miter);
