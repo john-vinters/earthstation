@@ -33,16 +33,15 @@ with Glib;				use Glib;
 with Glib.Main;				use Glib.Main;
 with GNAT.OS_Lib;			use GNAT.OS_Lib;
 with Gtk;				use Gtk;
-with Gtk.Button;			use Gtk.Button;
 with Gtk.Dialog;			use Gtk.Dialog;
 with Gtk.Enums;				use Gtk.Enums;
 with Gtk.Handlers;			use Gtk.Handlers;
 with Gtk.Main;				use Gtk.Main;
 with Gtkada.Dialogs;			use Gtkada.Dialogs;
+with Gtkada.File_Selection;		use Gtkada.File_Selection;
 
 package body EarthStation.Main_Window is
 
-   package File_Callback is new Handlers.Callback (Gtk_File_Selection_Record);
    package Main_Window_Timeout is new Glib.Main.Generic_Sources (Main_Window);
    package Menu_Item_Callback is new Handlers.Callback (Gtk_Menu_Item_Record);
    package Menu_Item_Window_Callback is new Handlers.User_Callback
@@ -234,50 +233,25 @@ package body EarthStation.Main_Window is
    is
       pragma Unreferenced (Object);
       pragma Unreferenced (User_Data);
-      Cancel_Button	: Gtk_Button;
-      OK_Button		: Gtk_Button;
-      Open_Dialogue	: Gtk_File_Selection;
    begin
-      Gtk_New (Open_Dialogue, "Import TLE File");
-      Hide_Fileop_Buttons (Open_Dialogue);
-      Cancel_Button := Get_Cancel_Button (Open_Dialogue);
-      OK_Button := Get_OK_Button (Open_Dialogue);
-
-      File_Callback.Object_Connect
-        (OK_Button,
-         "clicked",
-         File_Callback.To_Marshaller (Handle_Import_TLE_OK'Access),
-         Slot_Object => Open_Dialogue);
-
-      File_Callback.Object_Connect
-        (Cancel_Button,
-         "clicked",
-         File_Callback.To_Marshaller (Handle_Import_TLE_Cancel'Access),
-         Slot_Object => Open_Dialogue);
-
-      Show (Open_Dialogue);
+      declare
+         Filename	: constant String :=
+                            File_Selection_Dialog
+                              ("Import TLE File", "", False, True);
+      begin
+         if Filename /= "" then
+            Handle_Import_TLE_OK (Filename);
+         end if;
+      end;
    end Handle_Import_TLE;
-
-   ------------------------------
-   -- Handle_Import_TLE_Cancel --
-   ------------------------------
-
-   procedure Handle_Import_TLE_Cancel
-     (Object : access Gtk_File_Selection_Record'Class)
-   is
-   begin
-      Destroy (Object);
-   end Handle_Import_TLE_Cancel;
 
    --------------------------
    -- Handle_Import_TLE_OK --
    --------------------------
 
-   procedure Handle_Import_TLE_OK
-     (Object : access Gtk_File_Selection_Record'Class)
+   procedure Handle_Import_TLE_OK (Filename : in String)
    is
       File	: aliased File_Type;
-      Filename	: constant String := Get_Filename (Object);
       L1	: Unbounded_String;
       L2	: Unbounded_String;
       L3	: Unbounded_String;
@@ -339,8 +313,6 @@ package body EarthStation.Main_Window is
          Dialog_Type		=> Information,
          Buttons		=> Button_OK,
          Default_Button		=> Button_OK);
-
-      Destroy (Object);
    exception
       when Ada.IO_Exceptions.END_ERROR =>
          Result := Gtkada.Dialogs.Message_Dialog
@@ -352,7 +324,6 @@ package body EarthStation.Main_Window is
             Buttons		=> Button_OK,
             Default_Button	=> Button_OK);
 
-            Destroy (Object);
             Close (File);
       when Ada.IO_Exceptions.NAME_ERROR =>
          Result := Gtkada.Dialogs.Message_Dialog
@@ -360,7 +331,6 @@ package body EarthStation.Main_Window is
             Dialog_Type		=> Error,
             Buttons		=> Button_OK,
             Default_Button	=> Button_OK);
-            Destroy (Object);
    end Handle_Import_TLE_OK;
 
    ------------------------------

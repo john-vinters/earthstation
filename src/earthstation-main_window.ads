@@ -24,7 +24,6 @@ with EarthStation.Data_Table;		use EarthStation.Data_Table;
 with EarthStation.Map_Display;		use EarthStation.Map_Display;
 with EarthStation.Tracking;		use EarthStation.Tracking;
 with Gtk.Box;				use Gtk.Box;
-with Gtk.File_Selection;		use Gtk.File_Selection;
 with Gtk.Menu;				use Gtk.Menu;
 with Gtk.Menu_Bar;			use Gtk.Menu_Bar;
 with Gtk.Menu_Item;			use Gtk.Menu_Item;
@@ -83,13 +82,7 @@ private
    --  Asks user for a TLE file and imports Keplerian Elements from that
    --  file.
 
-   procedure Handle_Import_TLE_Cancel
-     (Object : access Gtk_File_Selection_Record'Class);
-   --  Handles 'Cancel' button click from import TLE dialogue.
-
-   procedure Handle_Import_TLE_OK
-     (Object : access Gtk_File_Selection_Record'Class);
-   --  Handles 'OK' button click from import TLE dialogue.
+   procedure Handle_Import_TLE_OK (Filename : in String);
 
    function Handle_Timeout (This : in Main_Window) return Boolean;
    --  Timer tick handler (updates display)
