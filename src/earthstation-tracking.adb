@@ -234,6 +234,24 @@ package body EarthStation.Tracking is
       Iterate (This.Satellites, Iterate_Proc'Access);
    end Initialize;
 
+   ----------------
+   -- Is_Tracked --
+   ----------------
+
+   function Is_Tracked
+     (This			: in Data;
+      Id			: in String) return Boolean
+   is
+      Upper_Id			: constant String := To_Upper (Id);
+   begin
+      for i in First_Index (This.Satellites) .. Last_Index (This.Satellites) loop
+         if Element (This.Satellites, i).Satellite_Id = Upper_Id then
+            return True;
+         end if;
+      end loop;
+      return False;
+   end Is_Tracked;
+
    ----------------------
    -- Select_Satellite --
    ----------------------

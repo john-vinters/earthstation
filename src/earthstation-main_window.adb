@@ -394,12 +394,12 @@ package body EarthStation.Main_Window is
       User_Data		: in     Main_Window)
    is
       pragma Unreferenced (Object);
-      pragma Unreferenced (User_Data);
       Track_Dialogue	: EarthStation.Select_Satellite.Select_Satellite;
    begin
-      Gtk_New (Track_Dialogue);
+      Gtk_New (Track_Dialogue, User_Data.Data'Access);
       if Run (Track_Dialogue) = Gtk_Response_OK then
-         put_line ("OK");
+         Update_Tracking_List (Track_Dialogue, User_Data.Data);
+         Update_Tracking_Menu (User_Data);
       end if;
       Destroy (Track_Dialogue);
    end Handle_Tracking_Select;
@@ -530,13 +530,9 @@ package body EarthStation.Main_Window is
          Longitude		=> Get_Groundstation_Longitude (Prefs),
          Height			=> Get_Groundstation_Height (Prefs));
 
-      Create_Keplerian_Elements_Directory;
-
-      This.Active_Track_Menu := EarthStation.Tracking.Allocate_Track_Menu
-        (This.Data'Access, Handle_Track_Menu_Select'Access);
-      Set_Submenu (This.Active_Track, This.Active_Track_Menu);
-
       Show_All (This);
+      Create_Keplerian_Elements_Directory;
+      Update_Tracking_Menu (This);
 
       Timeout := Main_Window_Timeout.Timeout_Add
         (500, Handle_Timeout'Access, Main_Window (This));
@@ -570,6 +566,22 @@ package body EarthStation.Main_Window is
       pragma Unreferenced (Object);
       EarthStation.About_Box.Run;
    end Show_About_Box;
+
+   --------------------------
+   -- Update_Tracking_Menu --
+   --------------------------
+
+   procedure Update_Tracking_Menu (This : access Main_Window_Record'Class) is
+   begin
+      if This.Active_Track_Menu /= null then
+         Destroy (This.Active_Track_Menu);
+      end if;
+
+      This.Active_Track_Menu := EarthStation.Tracking.Allocate_Track_Menu
+        (This.Data'Access, Handle_Track_Menu_Select'Access);
+      Set_Submenu (This.Active_Track, This.Active_Track_Menu);
+      Show_All (This.Active_Track_Menu);
+   end Update_Tracking_Menu;
 
 end EarthStation.Main_Window;
 

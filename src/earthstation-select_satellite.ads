@@ -19,6 +19,7 @@
 
 pragma License (GPL);
 
+with EarthStation.Tracking;		use EarthStation.Tracking;
 with Gtk.Button;			use Gtk.Button;
 with Gtk.Dialog;			use Gtk.Dialog;
 with Gtk.Tree_Store;			use Gtk.Tree_Store;
@@ -29,9 +30,18 @@ package EarthStation.Select_Satellite is
    type Select_Satellite_Record is new Gtk.Dialog.Gtk_Dialog_Record with private;
    type Select_Satellite is access all Select_Satellite_Record'Class;
 
-   procedure Gtk_New (This : out Select_Satellite);
+   procedure Gtk_New
+     (This		:    out Select_Satellite;
+      Tracking		: in     EarthStation.Tracking.Data_Access);
 
-   procedure Initialize (This : access Select_Satellite_Record'Class);
+   procedure Initialize
+     (This		: access Select_Satellite_Record'Class;
+      Tracking		: in     EarthStation.Tracking.Data_Access);
+
+   procedure Update_Tracking_List
+     (This		: access Select_Satellite_Record'Class;
+      Tracking		: in out EarthStation.Tracking.Data);
+   --  Updates Tracking using current dialogue settings
 
 private
 

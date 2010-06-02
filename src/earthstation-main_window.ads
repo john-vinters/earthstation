@@ -113,5 +113,8 @@ private
    procedure Show_About_Box (Object : access Gtk_Menu_Item_Record'Class);
    --  Shows the About Box dialogue box
 
+   procedure Update_Tracking_Menu (This : access Main_Window_Record'Class);
+   --  Updates the Tracking Menu
+
 end EarthStation.Main_Window;
 

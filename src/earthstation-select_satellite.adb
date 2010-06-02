@@ -20,6 +20,7 @@
 pragma License (GPL);
 
 with EarthStation.Keplerian_Elements;	use EarthStation.Keplerian_Elements;
+with EarthStation.Predict;		use EarthStation.Predict;
 with Glib;				use Glib;
 with Glib.Object;			use Glib.Object;
 with Glib.Values;			use Glib.Values;
@@ -41,6 +42,7 @@ package body EarthStation.Select_Satellite is
    Text_Column		: constant := 0;
 
    Temp_Store		: Gtk.Tree_Store.Gtk_Tree_Store;
+   Temp_Track		: EarthStation.Tracking.Data_Access;
 
    --------------
    -- Add_Line --
@@ -83,17 +85,23 @@ package body EarthStation.Select_Satellite is
    -- Gtk_New --
    -------------
 
-   procedure Gtk_New (This : out Select_Satellite) is
+   procedure Gtk_New
+     (This		:    out Select_Satellite;
+      Tracking		: in     EarthStation.Tracking.Data_Access)
+   is
    begin
       This := new Select_Satellite_Record;
-      EarthStation.Select_Satellite.Initialize (This);
+      EarthStation.Select_Satellite.Initialize (This, Tracking);
    end Gtk_New;
 
    ----------------
    -- Initialize --
    ----------------
 
-   procedure Initialize (This : access Select_Satellite_Record'Class) is
+   procedure Initialize
+     (This		: access Select_Satellite_Record'Class;
+      Tracking		: in     EarthStation.Tracking.Data_Access)
+   is
       Num		: Gint;
       Sat_Column	: Gtk.Tree_View_Column.Gtk_Tree_View_Column;
       Sel_Column	: Gtk.Tree_View_Column.Gtk_Tree_View_Column;
@@ -147,7 +155,9 @@ package body EarthStation.Select_Satellite is
       Attach (Table, Scrolled, 0, 1, 0, 1);
 
       Temp_Store := This.all.Store;
+      Temp_Track := Tracking;
       Iterate_Satellite_Names (Satellite_Iter'Access);
+      Temp_Track := null;
       Temp_Store := null;
 
       This.Get_VBox.Pack_Start (Table, Expand => True, Fill => True);
@@ -165,10 +175,41 @@ package body EarthStation.Select_Satellite is
    function Satellite_Iter (Satellite_Name : in String) return Boolean is
       Iter	: Gtk_Tree_Iter;
    begin
-      Iter := Add_Line (Temp_Store, Satellite_Name, Active => False);
+      if Is_Tracked (Temp_Track.all, Satellite_Name) then
+         Iter := Add_Line (Temp_Store, Satellite_Name, Active => True);
+      else
+         Iter := Add_Line (Temp_Store, Satellite_Name, Active => False);
+      end if;
       pragma Unreferenced (Iter);
       return True;
    end Satellite_Iter;
+
+   --------------------------
+   -- Update_Tracking_List --
+   --------------------------
+
+   procedure Update_Tracking_List
+     (This		: access Select_Satellite_Record'Class;
+      Tracking		: in out EarthStation.Tracking.Data)
+   is
+      Iter		: Gtk_Tree_Iter := Null_Iter;
+   begin
+      Clear (Tracking);
+      Iter := Get_Iter_First (This.Store);
+      while Iter /= Null_Iter loop
+         if Get_Boolean (This.Store, Iter, Active_Column) then
+            declare
+               Id	: constant String := 
+                            Get_String (This.Store, Iter, Text_Column);
+               Kep	: EarthStation.Predict.Keplerian_Elements;
+            begin
+               Kep := EarthStation.Keplerian_Elements.Load (Id);
+               EarthStation.Tracking.Add_Satellite (Tracking, Id, Kep);
+            end;
+         end if;
+         Next (This.Store, Iter);
+      end loop;
+   end Update_Tracking_List;
 
 end EarthStation.Select_Satellite;
 

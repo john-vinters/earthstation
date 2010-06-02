@@ -64,6 +64,11 @@ package EarthStation.Tracking is
       Height			: in     Long_Float);
    --  Initializes tracking - sets up groundstation details
 
+   function Is_Tracked
+     (This			: in Data;
+      Id			: in String) return Boolean;
+   --  Returns true if a satellite with the given Id is being tracked.
+
    procedure Select_Satellite
      (This			: in out Data;
       Menu_Item			: access Gtk_Menu_Item_Record'Class);
