@@ -20,6 +20,9 @@
 pragma License (GPL);
 
 with Ada.Characters.Handling;		use Ada.Characters.Handling;
+with Ada.Text_IO;			use Ada.Text_IO;
+with EarthStation.Keplerian_Elements;	use EarthStation.Keplerian_Elements;
+with EarthStation.Platform;		use EarthStation.Platform;
 with Gdk.Color;				use Gdk.Color;
 with Gtk.Widget;			use Gtk.Widget;
 
@@ -32,7 +35,7 @@ package body EarthStation.Tracking is
    Inrange_Colour		: Gdk.Color.Gdk_Color;
    Max_Tries			: constant Natural := 8640;
    Minimum_Elevation		: constant Long_Float := 3.0;
-   Null_Time			: constant Time := Clock;
+   Null_Time			: constant Time := Clock - 10.0;
    Selected_Colour		: Gdk.Color.Gdk_Color;
 
    -------------------
@@ -263,6 +266,83 @@ package body EarthStation.Tracking is
       end loop;
       return False;
    end Is_Tracked;
+
+   ----------
+   -- Load --
+   ----------
+
+   procedure Load (This : in out Data) is
+      Closed	: Boolean := True;
+      File      : File_Type;
+      Filename	: constant String := 
+                    EarthStation.Platform.Get_Preferences_Directory
+                    & "tracklist";
+   begin
+      Open (File, In_File, Filename);
+      Closed := False;
+      Clear (This);
+
+      while not End_Of_File (File) loop
+         declare
+            Len		: Natural;
+            Temp	: String (1 .. 256);
+         begin
+            Get_Line (File, Temp, Len);
+            Load_Satellite (This, Temp (1 .. Len));
+         end;
+      end loop;
+
+      Close (File);
+      Closed := True;
+   exception
+      when others =>
+         if not Closed then
+            Close (File);
+         end if;
+         raise;
+   end Load;
+
+   --------------------
+   -- Load_Satellite --
+   --------------------
+
+   procedure Load_Satellite
+     (This		: in out Data;
+      Id		: in     String)
+   is
+      K			: EarthStation.Predict.Keplerian_Elements;
+   begin
+      K := EarthStation.Keplerian_Elements.Load (Id);
+      Add_Satellite (This, Id, K);
+   end Load_Satellite;
+
+   ----------
+   -- Save --
+   ----------
+
+   procedure Save (This : in     Data) is
+      Closed	: Boolean := True;
+      File      : File_Type;
+      Filename	: constant String := 
+                    EarthStation.Platform.Get_Preferences_Directory
+                    & "tracklist";
+   begin
+      Create (File, Out_File, Filename);
+      Closed := False;
+
+      for i in First_Index (This.Satellites) .. Last_Index (This.Satellites) loop
+         Put_Line (File, To_String (Element (This.Satellites, i).Satellite_Id));
+      end loop;
+
+      Close (File);
+      Closed := True;
+   exception
+      when others =>
+         if not Closed then
+            Close (File);
+         end if;
+         raise;
+   end Save;
 
    ----------------------
    -- Select_Satellite --

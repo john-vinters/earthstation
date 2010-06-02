@@ -207,22 +207,6 @@ package body EarthStation.Main_Window is
       Destroy (GS_Dialogue);
    end Handle_Groundstation_Menu_Select;
 
-   --------------------
-   -- Handle_Timeout --
-   --------------------
-
-   function Handle_Timeout (This : in Main_Window) return Boolean is
-   begin
-      if not Shutting_Down then
-         EarthStation.Map_Display.Update_Start (This.Map);
-         EarthStation.Tracking.Update_Display
-           (This.Data, This.Map, This.Satellite_Data);
-         EarthStation.Map_Display.Update_End (This.Map);
-      end if;
-
-      return True;
-   end Handle_Timeout;
-
    -----------------------
    -- Handle_Import_TLE --
    -----------------------
@@ -313,6 +297,7 @@ package body EarthStation.Main_Window is
          Dialog_Type		=> Information,
          Buttons		=> Button_OK,
          Default_Button		=> Button_OK);
+
    exception
       when Ada.IO_Exceptions.END_ERROR =>
          Result := Gtkada.Dialogs.Message_Dialog
@@ -332,6 +317,22 @@ package body EarthStation.Main_Window is
             Buttons		=> Button_OK,
             Default_Button	=> Button_OK);
    end Handle_Import_TLE_OK;
+
+   --------------------
+   -- Handle_Timeout --
+   --------------------
+
+   function Handle_Timeout (This : in Main_Window) return Boolean is
+   begin
+      if not Shutting_Down then
+         EarthStation.Map_Display.Update_Start (This.Map);
+         EarthStation.Tracking.Update_Display
+           (This.Data, This.Map, This.Satellite_Data);
+         EarthStation.Map_Display.Update_End (This.Map);
+      end if;
+
+      return True;
+   end Handle_Timeout;
 
    ------------------------------
    -- Handle_Track_Menu_Select --
@@ -371,6 +372,20 @@ package body EarthStation.Main_Window is
       if Run (Track_Dialogue) = Gtk_Response_OK then
          Update_Tracking_List (Track_Dialogue, User_Data.Data);
          Update_Tracking_Menu (User_Data);
+
+         declare
+            Result	: Message_Dialog_Buttons;
+            pragma Unreferenced (Result);
+         begin
+            EarthStation.Tracking.Save (User_Data.Data);
+         exception
+            when others =>
+               Result := Gtkada.Dialogs.Message_Dialog
+                 (Msg			=> "Unable to Save Tracking List",
+                  Dialog_Type		=> Warning,
+                  Buttons		=> Button_OK,
+                  Default_Button	=> Button_OK);
+         end;
       end if;
       Destroy (Track_Dialogue);
    end Handle_Tracking_Select;
@@ -478,10 +493,13 @@ package body EarthStation.Main_Window is
 
       Add (This, This.VBox);
 
+      Create_Keplerian_Elements_Directory;
+
       begin
          EarthStation.Preferences.Initialize (Prefs);
+         EarthStation.Tracking.Load (This.Data);
       exception
-         when PREF_EXCEPTION =>
+         when others =>
             declare
                Result	: Message_Dialog_Buttons;
                pragma Unreferenced (Result);
@@ -502,7 +520,6 @@ package body EarthStation.Main_Window is
          Height			=> Get_Groundstation_Height (Prefs));
 
       Show_All (This);
-      Create_Keplerian_Elements_Directory;
       Update_Tracking_Menu (This);
 
       Timeout := Main_Window_Timeout.Timeout_Add

@@ -69,6 +69,12 @@ package EarthStation.Tracking is
       Id			: in String) return Boolean;
    --  Returns true if a satellite with the given Id is being tracked.
 
+   procedure Load (This : in out Data);
+   --  Loads Satellite list
+
+   procedure Save (This : in     Data);
+   --  Saves Satellite list
+
    procedure Select_Satellite
      (This			: in out Data;
       Menu_Item			: access Gtk_Menu_Item_Record'Class);
@@ -127,6 +133,11 @@ private
       Satellites		: Satellite_Vector.Vector;
       Selected_Satellite	: Natural := 0;
    end record;
+
+   procedure Load_Satellite
+     (This		: in out Data;
+      Id		: in     String);
+   --  Loads Satellite Keplerian Data given the Satellite Id
 
 end EarthStation.Tracking;
 
