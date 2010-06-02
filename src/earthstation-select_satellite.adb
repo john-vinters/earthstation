@@ -140,7 +140,7 @@ package body EarthStation.Select_Satellite is
          Slot_Object => This.all.Store);
 
       Gtk_New (Scrolled);
-      Set_Policy (Scrolled, Policy_Always, Policy_Always);
+      Set_Policy (Scrolled, Policy_Automatic, Policy_Automatic);
       Add (Scrolled, This.all.View);
       Show_All (Scrolled);
 
