@@ -51,16 +51,31 @@ package body EarthStation.Select_Satellite is
    function Add_Line
      (Model		: access Gtk.Tree_Store.Gtk_Tree_Store_Record'Class;
       Text		: in String;
-      Active		: in Boolean := False;
-      Parent		: in Gtk.Tree_Model.Gtk_Tree_Iter := Null_Iter)
+      Active		: in Boolean := False)
      return Gtk.Tree_Model.Gtk_Tree_Iter
    is
-      Iter		: Gtk.Tree_Model.Gtk_Tree_Iter;
+      Iter		: Gtk.Tree_Model.Gtk_Tree_Iter := Get_Iter_First (Model);
+      New_Iter		: Gtk.Tree_Model.Gtk_Tree_Iter := Null_Iter;
    begin
-      Prepend (Model, Iter, Parent);
-      Set (Model, Iter, Text_Column, Text);
-      Set (Model, Iter, Active_Column, Active);
-      return Iter;
+      while Iter /= Null_Iter loop
+         declare
+            Str		: constant String := Get_String (Model, Iter, Text_Column);
+         begin
+            if Text < Str then
+               Insert_Before (Model, New_Iter, Null_Iter, Iter);
+               Set (Model, New_Iter, Text_Column, Text);
+               Set (Model, New_Iter, Active_Column, Active);
+               return New_Iter;
+            else
+               Next (Model, Iter);
+            end if;
+         end;
+      end loop;
+
+      Append (Model, New_Iter, Null_Iter);
+      Set (Model, New_Iter, Text_Column, Text);
+      Set (Model, New_Iter, Active_Column, Active);
+      return New_Iter;
    end Add_Line;
 
    ---------------------
