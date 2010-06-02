@@ -44,6 +44,7 @@ package body EarthStation.Tracking is
       Id			: in     String;
       Elements			: in     EarthStation.Predict.Keplerian_Elements)
    is
+      Inserted	: Boolean := False;
       Item	: Satellite_Data;
    begin
       EarthStation.Predict.Initialize_Satellite
@@ -52,7 +53,18 @@ package body EarthStation.Tracking is
       Set_Unbounded_String (Item.Satellite_Id, To_Upper (Id));
 
       Calculate_Next_AOS_LOS (This, Item);
-      Append (This.Satellites, Item);
+
+      for i in First_Index (This.Satellites) .. Last_Index (This.Satellites) loop
+         if Id < Element (This.Satellites, i).Satellite_Id then
+            Insert (This.Satellites, i, Item);
+            Inserted := True;
+            exit;
+         end if;
+      end loop;
+
+      if not Inserted then
+         Append (This.Satellites, Item);
+      end if;
 
       if This.Selected_Satellite = 0 then
          Select_Satellite (This, Id);
