@@ -322,9 +322,9 @@ package body EarthStation.Keplerian_Elements is
 
       declare
          Epoch_Year_Str	: constant String := "20" & 
-                            Line_1 (Line_1'First + 19 .. Line_1'First + 20);
+                            Line_1 (Line_1'First + 18 .. Line_1'First + 19);
          Epoch_Time_Str	: constant String := 
-                            Line_1 (Line_1'First + 21 .. Line_1'First + 32);
+                            Line_1 (Line_1'First + 20 .. Line_1'First + 31);
          Inclin_Str	: constant String :=
                             Line_2 (Line_2'First + 8 .. Line_2'First + 15);
          RAAN_Str	: constant String :=
