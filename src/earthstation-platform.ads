@@ -48,6 +48,11 @@ package EarthStation.Platform is
    --  this function returns an empty string if the Platform-appropriate
    --  environment variable isn't set.
 
+   function Get_Share_Directory return String;
+   --  Returns the directory containing the background image.
+   --  On Unix-like systems this will be /usr/local/share/
+   --  On Windows this will be %PROGRAMFILES%\earthstation\
+
    function Home_Directory return String;
    --  returns home directory for application.
    --  On UNIX-Like platforms this is ${HOME}/.earthstation/

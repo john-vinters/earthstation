@@ -125,6 +125,33 @@ package body EarthStation.Platform is
       end if;
    end Get_Preferences_Directory;
 
+   -------------------------
+   -- Get_Share_Directory --
+   -------------------------
+
+   function Get_Share_Directory return String is
+   begin
+      if On_Windows then
+         declare
+            Program_Files	: String_Access := Getenv ("PROGRAMFILES");
+         begin
+            if Program_Files /= null then
+               declare
+                  Result	: constant String := Program_Files.all &
+                                    "\EarthStation\";
+               begin
+                  Free (Program_Files);
+                  return Result;
+               end;
+            else
+               return "";
+            end if;
+         end;
+      else
+         return "/usr/local/share/earthstation/";
+      end if;
+   end Get_Share_Directory;
+
    --------------------
    -- Home_Directory --
    --------------------

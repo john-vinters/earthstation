@@ -13,3 +13,8 @@ clean:
 	rm -f build/*
 	rm -f es
 
+install: earthstation
+	@mkdir -p /usr/local/share/earthstation
+	cp images/map.jpg /usr/local/share/earthstation/
+	cp es /usr/local/bin/
+

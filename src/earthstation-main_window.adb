@@ -402,8 +402,7 @@ package body EarthStation.Main_Window is
       Gtk.Window.Initialize (This, Window_Toplevel);
 
       Gtk_New (This.Menu_Bar);
-      Gtk_New (This.Map, "images/map.jpg");
-      --  XXX FIXME: map filename be different when the app is installed! XXX
+      Gtk_New (This.Map, EarthStation.Platform.Get_Share_Directory & "map.jpg");
 
       Gtk_New (This.Satellite_Data);
       Gtk_New (This.Status_Bar);
@@ -493,9 +492,10 @@ package body EarthStation.Main_Window is
 
       Add (This, This.VBox);
 
-      Create_Keplerian_Elements_Directory;
 
       begin
+         Create_Home_Directory;
+         Create_Keplerian_Elements_Directory;
          EarthStation.Preferences.Initialize (Prefs);
          EarthStation.Tracking.Load (This.Data);
       exception
@@ -509,6 +509,8 @@ package body EarthStation.Main_Window is
                   Dialog_Type		=> Warning,
                   Buttons		=> Button_OK,
                   Default_Button	=> Button_OK);
+
+               Try_Create_Preferences (This);
             end;
       end;
 
@@ -554,6 +556,25 @@ package body EarthStation.Main_Window is
       pragma Unreferenced (Object);
       EarthStation.About_Box.Run;
    end Show_About_Box;
+
+   ----------------------------
+   -- Try_Create_Preferences --
+   ----------------------------
+
+   procedure Try_Create_Preferences (This : access Main_Window_Record'Class) is
+      Result	: Message_Dialog_Buttons;
+      pragma Unreferenced (Result);
+   begin
+      EarthStation.Preferences.Save_Preferences (Prefs);
+      EarthStation.Tracking.Save (This.Data);
+   exception
+      when others =>
+         Result := Gtkada.Dialogs.Message_Dialog
+           (Msg			=> "Unable to Create Preferences!",
+            Dialog_Type		=> Error,
+            Buttons		=> Button_OK,
+            Default_Button	=> Button_OK);
+   end Try_Create_Preferences;
 
    --------------------------
    -- Update_Tracking_Menu --
