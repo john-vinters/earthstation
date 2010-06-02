@@ -19,6 +19,7 @@
 
 pragma License (GPL);
 
+with Ada.Characters.Handling;		use Ada.Characters.Handling;
 with Ada.Directories;			use Ada.Directories;
 with Ada.IO_Exceptions;
 with Ada.Strings;			use Ada.Strings;
@@ -360,7 +361,7 @@ package body EarthStation.Keplerian_Elements is
 
    function To_Filename (Input : in String) return String is
       Temp	: Unbounded_String;
-      Trim_Inp	: constant String := Trim_Nonprint (Input);
+      Trim_Inp	: constant String := To_Upper (Trim_Nonprint (Input));
    begin
       if Input'Length = 0 then
          raise CONSTRAINT_ERROR;
