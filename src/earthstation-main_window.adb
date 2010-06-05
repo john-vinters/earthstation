@@ -498,6 +498,8 @@ package body EarthStation.Main_Window is
          Create_Keplerian_Elements_Directory;
          EarthStation.Preferences.Initialize (Prefs);
          EarthStation.Tracking.Load (This.Data);
+         EarthStation.Tracking.Select_Satellite
+           (This.Data, EarthStation.Preferences.Get_Selected_Satellite (Prefs));
       exception
          when others =>
             declare
