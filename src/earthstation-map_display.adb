@@ -161,8 +161,9 @@ package body EarthStation.Map_Display is
 
       Nx := Longitude_To_X (This, Longitude);
       Ny := Latitude_To_Y (This, Latitude);
-      Set_Foreground (GC, Red);
+      Set_Foreground (GC, Colour);
       Draw_Text (This.Screen_Image, Id_Font, GC, Nx + 5, Ny - 5, Text => Id);
+      Set_Foreground (GC, Red);
       Draw_Rectangle (This.Screen_Image, GC, True, Nx - 1, Ny - 1, 3, 3);
 
       Unref (GC);
@@ -341,9 +342,9 @@ package body EarthStation.Map_Display is
       Alloc_Color (Get_Default_Colormap, Yellow, False, True, Success);
       Alloc_Color (Get_Default_Colormap, White, False, True, Success);
 
-      Load (Clock_Font, "-*-lucidatypewriter-medium-r-*-*-12-*-*-*-*-*-*-*");
-      Load (Grid_Font, "-*-lucidatypewriter-medium-r-*-*-9-*-*-*-*-*-*-*");
-      Load (Id_Font, "-*-lucidatypewriter-medium-r-*-*-12-*-*-*-*-*-*-*");
+      Load (Clock_Font, "-misc-fixed-bold-r-*-*-14-*-*-*-*-*-*-*");
+      Load (Grid_Font, "-misc-fixed-medium-r-*-*-9-*-*-*-*-*-*-*");
+      Load (Id_Font, "-misc-fixed-bold-r-*-*-13-*-*-*-*-*-*-*");
 
       Expose_Callback.Object_Connect
         (This.Area, "expose_event", Expose_Callback.To_Marshaller (Expose'Access), This);
