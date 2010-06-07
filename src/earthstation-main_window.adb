@@ -27,7 +27,6 @@ with EarthStation.Groundstation_Dialogue;
 with EarthStation.Keplerian_Elements;	use EarthStation.Keplerian_Elements;
 with EarthStation.Platform;		use EarthStation.Platform;
 with EarthStation.Predict;		use EarthStation.Predict;
-with EarthStation.Preferences;		use EarthStation.Preferences;
 with EarthStation.Select_Satellite;	use EarthStation.Select_Satellite;
 with Glib;				use Glib;
 with Glib.Main;				use Glib.Main;
@@ -48,8 +47,48 @@ package body EarthStation.Main_Window is
      (Gtk_Menu_Item_Record, Main_Window);
    package Window_Callback is new Handlers.Callback (Gtk_Widget_Record);
 
-   Prefs			: EarthStation.Preferences.Pref_Data;
+   DEFAULT_GS_NAME		: constant String := "Halifax";
+   DEFAULT_GS_LAT		: constant Long_Float := 53.71;
+   DEFAULT_GS_LON		: constant Long_Float := -1.86;
+   DEFAULT_GS_HT		: constant Long_Float := 500.0;
+
+   PREF_GS_NAME			: constant String := "pref.gs_name";
+   PREF_GS_LAT			: constant String := "pref.gs_lat";
+   PREF_GS_LON			: constant String := "pref.gs_lon";
+   PREF_GS_HT			: constant String := "pref.gs_ht";
+   PREF_SAT_SELECT		: constant String := "pref.sel_sat";
+
+   Prefs_Filename		: constant String := 
+                                    EarthStation.Platform.Get_Preferences_Directory
+                                    & "prefs";
+   Prefs			: Config_File.Config_Data;
    Shutting_Down		: Boolean := False;
+
+   --------------------------------
+   -- Create_Default_Preferences --
+   --------------------------------
+
+   procedure Create_Default_Preferences (This : in out Config_File.Config_Data) is
+   begin
+      Config_File.Set_String (This, PREF_GS_NAME, DEFAULT_GS_NAME);
+      Config_File.Set_Long_Float (This, PREF_GS_LAT, DEFAULT_GS_LAT);
+      Config_File.Set_Long_Float (This, PREF_GS_LON, DEFAULT_GS_LON);
+      Config_File.Set_Long_Float (This, PREF_GS_HT, DEFAULT_GS_HT);
+      Config_File.Set_String (This, PREF_SAT_SELECT, "");
+
+      declare
+         Result	: Message_Dialog_Buttons;
+         pragma Unreferenced (Result);
+      begin
+         Result := Gtkada.Dialogs.Message_Dialog
+           (Msg			=> "Using default preferences",
+            Dialog_Type		=> Warning,
+            Buttons		=> Button_OK,
+            Default_Button	=> Button_OK);
+
+         Save_Preferences (This);      
+      end;
+   end Create_Default_Preferences;
 
    ---------------
    -- Exit_Main --
@@ -153,25 +192,25 @@ package body EarthStation.Main_Window is
    begin
       Gtk_New (GS_Dialogue);
       ESGD.Set_GS_Name
-        (GS_Dialogue, Get_Groundstation_Name (Prefs));
+        (GS_Dialogue, Config_File.Get_String (Prefs, PREF_GS_NAME, False, DEFAULT_GS_NAME));
       ESGD.Set_Latitude
-        (GS_Dialogue, Get_Groundstation_Latitude (Prefs));
+        (GS_Dialogue, Config_File.Get_Long_Float (Prefs, PREF_GS_LAT, False, DEFAULT_GS_LAT));
       ESGD.Set_Longitude
-        (GS_Dialogue, Get_Groundstation_Longitude (Prefs));
+        (GS_Dialogue, Config_File.Get_Long_Float (Prefs, PREF_GS_LON, False, DEFAULT_GS_LON));
       ESGD.Set_Height
-        (GS_Dialogue, Get_Groundstation_Height (Prefs));
+        (GS_Dialogue, Config_File.Get_Long_Float (Prefs, PREF_GS_HT, False, DEFAULT_GS_HT));
 
       loop
          begin
             if Run (GS_Dialogue) = Gtk_Response_OK then
-               Set_Groundstation_Name
-                 (Prefs, ESGD.Get_GS_Name (GS_Dialogue));
-               Set_Groundstation_Latitude
-                 (Prefs, ESGD.Get_Latitude (GS_Dialogue));
-               Set_Groundstation_Longitude
-                 (Prefs, ESGD.Get_Longitude (GS_Dialogue));
-               Set_Groundstation_Height
-                 (Prefs, ESGD.Get_Height (GS_Dialogue));
+               Config_File.Set_String
+                 (Prefs, PREF_GS_NAME, ESGD.Get_GS_Name (GS_Dialogue));
+               Config_File.Set_Long_Float
+                 (Prefs, PREF_GS_LAT, ESGD.Get_Latitude (GS_Dialogue));
+               Config_File.Set_Long_Float
+                 (Prefs, PREF_GS_LON, ESGD.Get_Longitude (GS_Dialogue));
+               Config_File.Set_Long_Float
+                 (Prefs, PREF_GS_HT, ESGD.Get_Height (GS_Dialogue));
                exit;
             else
                exit;
@@ -188,22 +227,12 @@ package body EarthStation.Main_Window is
 
       EarthStation.Tracking.Initialize
         (This			=> User_Data.Data,
-         Groundstation_Name	=> Get_Groundstation_Name (Prefs),
-         Latitude		=> Get_Groundstation_Latitude (Prefs),
-         Longitude		=> Get_Groundstation_Longitude (Prefs),
-         Height			=> Get_Groundstation_Height (Prefs));
+         Groundstation_Name	=> Config_File.Get_String (Prefs, PREF_GS_NAME),
+         Latitude		=> Config_File.Get_Long_Float (Prefs, PREF_GS_LAT),
+         Longitude		=> Config_File.Get_Long_Float (Prefs, PREF_GS_LON),
+         Height			=> Config_File.Get_Long_Float (Prefs, PREF_GS_HT));
 
-      begin
-         Save_Preferences (Prefs);
-      exception
-         when others =>
-            Result := Gtkada.Dialogs.Message_Dialog
-              (Msg		=> "Can't save Preferences",
-               Dialog_Type	=> Warning,
-               Buttons		=> Button_OK,
-               Default_Button	=> Button_OK);
-      end;
-
+      Save_Preferences (Prefs);
       Destroy (GS_Dialogue);
    end Handle_Groundstation_Menu_Select;
 
@@ -346,15 +375,9 @@ package body EarthStation.Main_Window is
       pragma Unreferenced (Result);
    begin
       EarthStation.Tracking.Select_Satellite (User_Data.all, Object);
-      Set_Selected_Satellite (Prefs, Get_Selected_Satellite (User_Data.all));
-      Save_Preferences (Prefs);
-   exception
-      when PREF_EXCEPTION =>
-         Result := Gtkada.Dialogs.Message_Dialog
-           (Msg			=> "Can't save Preferences",
-            Dialog_Type		=> Error,
-            Buttons		=> Button_OK,
-            Default_Button	=> Button_OK);
+      Config_File.Set_String
+        (Prefs, PREF_SAT_SELECT, Get_Selected_Satellite (User_Data.all));
+     Save_Preferences (Prefs);
    end Handle_Track_Menu_Select;
 
    ----------------------------
@@ -493,35 +516,22 @@ package body EarthStation.Main_Window is
       Add (This, This.VBox);
 
 
-      begin
-         Create_Home_Directory;
-         Create_Keplerian_Elements_Directory;
-         EarthStation.Preferences.Initialize (Prefs);
-         EarthStation.Tracking.Load (This.Data);
-         EarthStation.Tracking.Select_Satellite
-           (This.Data, EarthStation.Preferences.Get_Selected_Satellite (Prefs));
-      exception
-         when others =>
-            declare
-               Result	: Message_Dialog_Buttons;
-               pragma Unreferenced (Result);
-            begin 
-               Result := Gtkada.Dialogs.Message_Dialog
-                 (Msg			=> "Can't Load Preferences - using Defaults",
-                  Dialog_Type		=> Warning,
-                  Buttons		=> Button_OK,
-                  Default_Button	=> Button_OK);
-
-               Try_Create_Preferences (This);
-            end;
-      end;
+      Initialize_Directories;
+      Load_Preferences (Prefs);
+      EarthStation.Tracking.Load (This.Data);
+      EarthStation.Tracking.Select_Satellite
+        (This.Data, Config_File.Get_String (Prefs, PREF_SAT_SELECT, False, ""));
 
       EarthStation.Tracking.Initialize
         (This			=> This.Data,
-         Groundstation_Name	=> Get_Groundstation_Name (Prefs),
-         Latitude		=> Get_Groundstation_Latitude (Prefs),
-         Longitude		=> Get_Groundstation_Longitude (Prefs),
-         Height			=> Get_Groundstation_Height (Prefs));
+         Groundstation_Name	=> Config_File.Get_String
+                                     (Prefs, PREF_GS_NAME, False, DEFAULT_GS_NAME),
+         Latitude		=> Config_File.Get_Long_Float
+                                     (Prefs, PREF_GS_LAT, False, DEFAULT_GS_LAT),
+         Longitude		=> Config_File.Get_Long_Float
+                                     (Prefs, PREF_GS_LON, False, DEFAULT_GS_LON),
+         Height			=> Config_File.Get_Long_Float
+                                     (Prefs, PREF_GS_HT, False, DEFAULT_GS_HT));
 
       Show_All (This);
       Update_Tracking_Menu (This);
@@ -529,6 +539,29 @@ package body EarthStation.Main_Window is
       Timeout := Main_Window_Timeout.Timeout_Add
         (350, Handle_Timeout'Access, Main_Window (This));
    end Initialize;
+
+   ----------------------------
+   -- Initialize_Directories --
+   ----------------------------
+
+   procedure Initialize_Directories is
+   begin
+      Create_Home_Directory;
+      Create_Keplerian_Elements_Directory;
+      Create_Preferences_Directory;
+   end Initialize_Directories;
+
+   ----------------------
+   -- Load_Preferences --
+   ----------------------
+
+   procedure Load_Preferences (Config : in out Config_File.Config_Data) is
+   begin
+      Config_File.Load (Config, Prefs_Filename);
+   exception
+      when others =>
+         Create_Default_Preferences (Config);
+   end Load_Preferences;
 
    --------------------
    -- Looks_Like_TLE --
@@ -549,6 +582,24 @@ package body EarthStation.Main_Window is
       end if;
    end Looks_Like_TLE;
 
+   ----------------------
+   -- Save_Preferences --
+   ----------------------
+
+   procedure Save_Preferences (Config : in out Config_File.Config_Data) is
+      Result	: Message_Dialog_Buttons;
+      pragma Unreferenced (Result);
+   begin
+      Config_File.Save (Config, Prefs_Filename);
+   exception
+      when others =>
+         Result := Gtkada.Dialogs.Message_Dialog
+           (Msg			=> "Unable to save preferences",
+            Dialog_Type		=> Error,
+            Buttons		=> Button_OK,
+            Default_Button	=> Button_OK);
+   end Save_Preferences;
+
    --------------------
    -- Show_About_Box --
    --------------------
@@ -558,25 +609,6 @@ package body EarthStation.Main_Window is
       pragma Unreferenced (Object);
       EarthStation.About_Box.Run;
    end Show_About_Box;
-
-   ----------------------------
-   -- Try_Create_Preferences --
-   ----------------------------
-
-   procedure Try_Create_Preferences (This : access Main_Window_Record'Class) is
-      Result	: Message_Dialog_Buttons;
-      pragma Unreferenced (Result);
-   begin
-      EarthStation.Preferences.Save_Preferences (Prefs);
-      EarthStation.Tracking.Save (This.Data);
-   exception
-      when others =>
-         Result := Gtkada.Dialogs.Message_Dialog
-           (Msg			=> "Unable to Create Preferences!",
-            Dialog_Type		=> Error,
-            Buttons		=> Button_OK,
-            Default_Button	=> Button_OK);
-   end Try_Create_Preferences;
 
    --------------------------
    -- Update_Tracking_Menu --

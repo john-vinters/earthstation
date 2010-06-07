@@ -20,6 +20,7 @@
 pragma License (GPL);
 
 with Ada.Strings.Unbounded;		use Ada.Strings.Unbounded;
+with Config_File;			use Config_File;
 with EarthStation.Data_Table;		use EarthStation.Data_Table;
 with EarthStation.Map_Display;		use EarthStation.Map_Display;
 with EarthStation.Tracking;		use EarthStation.Tracking;
@@ -97,17 +98,23 @@ private
       User_Data		: in     Main_Window);
    --  Handles Tracking Select Dialogue.
 
+   procedure Initialize_Directories;
+   --  Creates the Keplerian Elements and Preferences Directories (if needed)
+
+   procedure Load_Preferences (Config : in out Config_File.Config_Data);
+   --  Loads preferences from disk
+
    function Looks_Like_TLE
      (Name		: in Unbounded_String;
       Line_1		: in Unbounded_String;
       Line_2		: in Unbounded_String) return Boolean;
    --  Returns true if the given lines look like a TLE element
 
+   procedure Save_Preferences (Config : in out Config_File.Config_Data);
+   --  Saves preferences to disk
+
    procedure Show_About_Box (Object : access Gtk_Menu_Item_Record'Class);
    --  Shows the About Box dialogue box
-
-   procedure Try_Create_Preferences (This : access Main_Window_Record'Class);
-   --  Tries to create preferences
 
    procedure Update_Tracking_Menu (This : access Main_Window_Record'Class);
    --  Updates the Tracking Menu

@@ -20,11 +20,13 @@
 pragma License (GPL);
 
 with Ada.Characters.Handling;		use Ada.Characters.Handling;
+with Ada.IO_Exceptions;			use Ada.IO_Exceptions;
 with Ada.Text_IO;			use Ada.Text_IO;
 with EarthStation.Keplerian_Elements;	use EarthStation.Keplerian_Elements;
 with EarthStation.Platform;		use EarthStation.Platform;
 with Gdk.Color;				use Gdk.Color;
 with Gtk.Widget;			use Gtk.Widget;
+with Gtkada.Dialogs;			use Gtkada.Dialogs;
 
 package body EarthStation.Tracking is
 
@@ -295,11 +297,23 @@ package body EarthStation.Tracking is
       Close (File);
       Closed := True;
    exception
+      when Ada.IO_Exceptions.NAME_ERROR =>
+         null;
       when others =>
          if not Closed then
             Close (File);
          end if;
-         raise;
+
+         declare
+            Result	: Message_Dialog_Buttons;
+            pragma Unreferenced (Result);
+         begin
+            Result := Gtkada.Dialogs.Message_Dialog
+              (Msg		=> "Unable to load tracking list",
+               Dialog_Type	=> Error,
+               Buttons		=> Button_OK,
+               Default_Button	=> Button_OK);
+         end;
    end Load;
 
    --------------------
@@ -341,7 +355,17 @@ package body EarthStation.Tracking is
          if not Closed then
             Close (File);
          end if;
-         raise;
+
+         declare
+            Result	: Message_Dialog_Buttons;
+            pragma Unreferenced (Result);
+         begin
+            Result := Gtkada.Dialogs.Message_Dialog
+              (Msg		=> "Unable to save tracking list",
+               Dialog_Type	=> Error,
+               Buttons		=> Button_OK,
+               Default_Button	=> Button_OK);
+         end;
    end Save;
 
    ----------------------
