@@ -395,20 +395,7 @@ package body EarthStation.Main_Window is
       if Run (Track_Dialogue) = Gtk_Response_OK then
          Update_Tracking_List (Track_Dialogue, User_Data.Data);
          Update_Tracking_Menu (User_Data);
-
-         declare
-            Result	: Message_Dialog_Buttons;
-            pragma Unreferenced (Result);
-         begin
-            EarthStation.Tracking.Save (User_Data.Data);
-         exception
-            when others =>
-               Result := Gtkada.Dialogs.Message_Dialog
-                 (Msg			=> "Unable to Save Tracking List",
-                  Dialog_Type		=> Warning,
-                  Buttons		=> Button_OK,
-                  Default_Button	=> Button_OK);
-         end;
+         EarthStation.Tracking.Save (User_Data.Data);
       end if;
       Destroy (Track_Dialogue);
    end Handle_Tracking_Select;
