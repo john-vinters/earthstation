@@ -41,7 +41,7 @@ package body EarthStation.About_Box is
       Set_Comments (Dialog, "Satellite Tracker");
       Set_Copyright (Dialog, "Copyright (c) 2010, John Vinters G7NSN");
       Set_Name (Dialog, "EarthStation");
-      Set_Version (Dialog, "0.20");
+      Set_Version (Dialog, "0.30");
       Set_Website (Dialog, "http://github.com/john-vinters/earthstation");
       Set_License (Dialog,
         "This program is free software; you can redistribute it and/or" & LF
